@@ -38,6 +38,8 @@ async def read_paginated_device(db_interface:MongoDBInterface, query: DeviceMult
     if query.cursor is not None:
         mongo_cursor = mongo_cursor.skip(query.cursor)
     if query.limit is not None:
+        if query.limit > 100:
+            query.limit = 100 
         mongo_cursor = mongo_cursor.limit(query.limit)
     else:
         mongo_cursor = mongo_cursor.limit(50)
@@ -88,6 +90,8 @@ async def read_paginated_logs(db_interface:MongoDBInterface, query: TimeseriesMu
     if query.limit is not None:
         mongo_cursor = mongo_cursor.limit(query.limit)
     else:
+        if query.limit > 500:
+            query.limit = 500 
         mongo_cursor = mongo_cursor.limit(50)
 
     page = list()
