@@ -13,7 +13,7 @@ class DeviceMultiRetreivalRequest(BaseModel):
     limit: Optional[int]  = None
 
 class TimeseriesMultiRetreivalRequest(BaseModel): 
-    datetime: Optional[datetime] = None
+    timestamp: Optional[datetime] = None
     device: Optional[str] = None
     sensor: Optional[list[str]] = None
     dataFields: Optional[list[str]] = None
