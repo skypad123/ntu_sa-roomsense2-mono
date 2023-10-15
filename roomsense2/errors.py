@@ -10,3 +10,6 @@ class ItemNotFoundError(Exception):
 
 class UpdateFailError(Exception):
     pass
+
+class UploadFailError(Exception):
+    pass

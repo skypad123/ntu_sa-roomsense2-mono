@@ -1,7 +1,7 @@
 from datetime import datetime
 import tomli
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from roomsense2.common_types import DeviceMeta, TimeseriesLog
 
 ## classes for Multi Retrival Routes
