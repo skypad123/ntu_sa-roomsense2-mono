@@ -106,7 +106,7 @@ async def page_logs(item: TimeseriesMultiRetreivalRequest):
 # RabbitMq may be used to bulk upload to monogdb
 # following endpoint route them into queue (logs likely)
 
-@app.post("/upload/device")
+@app.post("/update/device")
 async def upload_device(item: UploadDeviceRequest):
 #register device to mongodb
     response_wrapper = MongodbUploadResponse() 
@@ -126,7 +126,7 @@ async def upload_device(item: UploadDeviceRequest):
     finally:
         return response_wrapper.to_dict()
 
-@app.post("/upload/log")
+@app.post("/update/log")
 async def upload_log(item: UploadLogRequest):
 #validation will be done with sensor-field mapping
     response_wrapper = MongodbUploadResponse() 
