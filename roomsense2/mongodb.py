@@ -128,7 +128,7 @@ async def read_single_log(db_interface:MongoDBInterface, object_id:str):
 async def insert_device(db_interface:MongoDBInterface, data: DeviceMeta):
     print(f"inserting data into devices collection: {data}")
     coll = db_interface.database[db_interface.collectionMapping["Devices"]]
-    return await coll.find_one_and_replace({"device": data.device},data.to_dict(),{"upsert":True})
+    return await coll.find_one_and_replace({"device": data.device},data.to_dict(),upsert=True, return_document=True)
 
 # inserting/updating Log data
 async def insert_log(db_interface:MongoDBInterface, data: TimeseriesLog):

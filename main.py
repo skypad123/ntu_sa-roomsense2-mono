@@ -112,6 +112,7 @@ async def upload_device(item: UploadDeviceRequest):
     response_wrapper = MongodbUploadResponse() 
     try:
         result = await insert_device(mongodb_interface, item)
+        print(result)
         if result is None:
             raise UpdateFailError
         if result["_id"] is not None:
@@ -131,6 +132,7 @@ async def upload_log(item: UploadLogRequest):
     response_wrapper = MongodbUploadResponse() 
     try:
         result = await insert_log(mongodb_interface, item)
+
         if result is None:
             raise UpdateFailError
         if result.inserted_id is not None:
