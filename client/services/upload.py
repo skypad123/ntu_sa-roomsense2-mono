@@ -1,0 +1,171 @@
+
+import requests 
+from dotenv import load_dotenv
+from datetime import datetime
+import os 
+import json
+import logging
+import sys
+
+from typing import Optional, Callable
+from dataclasses import dataclass
+
+## <-- component types for device information -->
+@dataclass
+class DeviceMeta:
+    device: str
+    userSetLocation: Optional[str] = None
+    sensors: Optional[list[str]] = None
+    
+    def to_dict(self):
+        ret = {
+            "device": self.device,
+            "userSetLocation": self.userSetLocation
+        }
+        if self.sensors is not None:
+            ret["sensors"] = self.sensors
+        return ret
+
+
+async def insert_device(backend_url: str): 
+    url = backend_url + "/update/device"
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    device_name = os.getenv("DEVICE_NAME")
+    if device_name is None:
+        raise Exception("DEVICE_NAME not set")
+    user_set_location = os.getenv("USER_SET_LOCATION")
+    sensors = os.getenv("SENSORS_LIST")
+    if sensors is not None:
+        sensors = sensors.split(",")
+    payload = DeviceMeta(device=device_name, userSetLocation=user_set_location, sensors=sensors).to_dict()
+
+    response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
+    
+    logging.debug(response.text)
+    return response.json()
+## <-- component types for device information -->
+
+## <-- component types for timeseries log data -->
+@dataclass
+class HumidityTemperature:
+    humidity: float
+    temperature: float
+
+    def to_dict(self):
+        return {
+            "humidity": self.humidity,
+            "temperature": self.temperature
+        }
+    
+@dataclass
+class Co2HumidityTemperature:
+    co2: float
+    humidity: float
+    temperature: float
+
+    def to_dict(self):
+        return {
+            "co2": self.co2,
+            "humidity": self.humidity,
+            "temperature": self.temperature
+        }
+    
+@dataclass
+class Brightness:
+    brightness: float
+
+    def to_dict(self):
+        return {
+            "brightness": self.brightness
+        }
+    
+@dataclass 
+class Image:
+    imageUrl: str
+
+    def to_dict(self):
+        return {
+            "imageUrl": self.imageUrl
+        }
+    
+@dataclass
+class Audio:
+    audioUrl: str
+
+    def to_dict(self):
+        return {
+            "audioUrl": self.audioUrl
+        }
+
+@dataclass
+class Metadata:
+    device: str
+    sensor: str
+    
+    def to_dict(self):
+        return {
+            "device": self.device,
+            "sensor": self.sensor
+        }
+
+#shorthand for OR operator typing on "data" field
+HT = HumidityTemperature
+B = Brightness
+CHT = Co2HumidityTemperature
+I = Image
+A = Audio
+
+@dataclass
+class TimeseriesLog: 
+    timestamp: datetime
+    metadata: Metadata
+    objectId: Optional[str] = None
+    data: Optional[HT|B|CHT|I|A] = None
+
+    def to_dict (self):        
+        ret = {
+            "timestamp": self.timestamp.isoformat(),
+            "metadata": self.metadata.to_dict(),
+            "data": self.data.to_dict()
+        }
+        if self.objectId is not None:
+            ret["objectId"] = self.objectId
+        return ret
+    
+
+async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: str, sensor: str , data: HT|B|CHT|I|A): 
+    url = backend_url + "/update/log"
+
+    metadata = Metadata(device=device_name, sensor=sensor)
+    payload = TimeseriesLog(timestamp=timestamp, metadata=metadata, data=data).to_dict()
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
+    response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
+
+    logging.debug(response.text)
+    return response.json()
+
+
+
+
+if __name__ == "__main__":
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)    
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
+
+    load_dotenv()
+    backend_url = os.getenv("BACKEND_URL")
+    insert_timeseries(backend_url, datetime.now(), "prototype #1", "SCD41", CHT(co2=100, humidity=50, temperature=25))
+

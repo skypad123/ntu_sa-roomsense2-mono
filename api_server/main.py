@@ -19,6 +19,7 @@ mongodb_interface = MongoDBInterface(config["MONGODB_CONNECTION_STRING"], config
 mongodb_interface.set_collection_mapping("Devices", config["MONGODB_DEVICES_COLLECTION_NAME"])
 mongodb_interface.set_collection_mapping("Logs", config["MONGODB_LOGS_COLLECTION_NAME"])
 
+
 ## Single Retrival Requests
 # Requests for following routes will be done via GET method and request through the url
 

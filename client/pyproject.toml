@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "roomsense2-client"
+version = "0.1.0"
+description = ""
+authors = ["Sky Livingston <skypad123@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+getmac = "^0.9.4"
+smbus2 = "^0.4.3"
+adafruit-circuitpython-htu21d = "^0.11.13"
+board = "^1.0"
+cffi = "^1.16.0"
+python-dotenv = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
