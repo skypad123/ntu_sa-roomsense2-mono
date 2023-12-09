@@ -18,7 +18,6 @@ async def read_scd41(i2c_bus, timeout = datetime.timedelta(0,1,0) ) -> SCD41Read
     scd4x = SCD4X(i2c_bus)
     scd4x.measure_single_shot()
 
-    sample_counter = 0
     start_time = datetime.datetime.now()
 
     while True:
