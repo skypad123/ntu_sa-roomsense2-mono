@@ -1,18 +1,15 @@
 from dataclasses import dataclass
-
 import time
 import board
 from adafruit_scd4x import SCD4X
 import datetime
 import asyncio
 
-
 @dataclass
 class SCD41Reading:
     co2 : int
     temperature : float
     humidity: float
-
 
 async def read_scd41(i2c_bus, timeout = datetime.timedelta(0,1,0) ) -> SCD41Reading:
     scd4x = SCD4X(i2c_bus)
