@@ -93,4 +93,4 @@ while True:
         print("Temperature: %0.1f *C" % scd4x.temperature)
         print("Humidity: %0.1f %%" % scd4x.relative_humidity)
         print()
-    time.sleep(1)
+    time.sleepi
