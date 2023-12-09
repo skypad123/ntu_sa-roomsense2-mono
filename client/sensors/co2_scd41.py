@@ -19,7 +19,7 @@ async def read_scd41(i2c_bus, timeout = datetime.timedelta(0,1,0) ) -> SCD41Read
     scd4x.measure_single_shot()
 
     sample_counter = 0
-    start_time = datetime.now()
+    start_time = datetime.datetime.now()
 
     while True:
         if scd4x.data_ready:
@@ -30,7 +30,7 @@ async def read_scd41(i2c_bus, timeout = datetime.timedelta(0,1,0) ) -> SCD41Read
 
             return SCD41Reading(co2=scd4x.CO2, temperature=scd4x.temperature, humidity=scd4x.relative_humidity)
         else:
-            if start_time < datetime.now() - timeout:
+            if start_time < datetime.datetime.now() - timeout:
                 raise TimeoutError("SCD41 did not return data in time") 
             asyncio.sleep(1)
 
