@@ -6,7 +6,7 @@ import os
 import json
 import logging
 import sys
-
+from getmac import get_mac_address as gma # mac address
 from typing import Optional, Callable
 from dataclasses import dataclass
 
@@ -153,6 +153,25 @@ async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: 
     return response.json()
 
 
+
+
+def register_device(base_url:str,device_location: Optional[str] ,sensors: Optional[list[str]]):
+    
+    json_data = {
+        "device": gma(),
+        "userSetLocation": device_location,
+    }
+    if sensors is not None:
+        json_data["sensors"] = sensors
+    res = requests.post( f"{base_url}/update/device", json=json_data)
+    print(res.json())
+
+
+def upload_image():
+    pass
+
+def upload_audio():
+    pass
 
 
 if __name__ == "__main__":

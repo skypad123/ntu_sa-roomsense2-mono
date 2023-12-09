@@ -6,6 +6,10 @@ import logging
 from threading import Thread, Semaphore
 from datetime import datetime, timedelta
 from collections import defaultdict
+import board
+import sensors.co2_scd41 as co2_scd41
+import sensors.humidity_temp_htu2x as htu2x
+import sensors.light_tsl2591 as tsl2591
 
 @dataclass
 class AbstractAction:
@@ -156,15 +160,25 @@ class ActionManager:
 
     async def process_sdc41_return_action(self,Action):
         #insert spawn new thread to send data to server
-        pass
+        async def print_sdc41():
+            print(f"co2 : {Action.co2}")
+        runnable = Thread(target = print_sdc41)
+        runnable.start()
 
     async def process_htu2x_return_action(self,Action):
         #insert spawn new thread to send data to server
-        pass
+        async def print_htu2x():
+            print(f"temp : {Action.temperature}, humidity : {Action.humidity}")
+        runnable = Thread(target = print_htu2x)
+        runnable.start()
+
 
     async def process_tsl2591_return_action(self,Action):
         #insert spawn new thread to send data to server
-        pass
+        async def print_tsl2591():
+            print(f"lux : {Action.lux}")
+        runnable = Thread(target = print_tsl2591 )
+        runnable.start()
 
     async def process_sgm58031_return_action(self,Action):
         #insert spawn new thread to send data to server
@@ -198,10 +212,10 @@ class TimingController:
             "trigger_interval_s" : 5,
             "trigger_expiration_s" : 60
         },
-        "SGM58031TriggerAction" : {
-            "trigger_interval_s" : 5,
-            "trigger_expiration_s" : 60
-        },
+        # "SGM58031TriggerAction" : {
+        #     "trigger_interval_s" : 5,
+        #     "trigger_expiration_s" : 60
+        # },
         "RPICAMTriggerAction" : {
             "trigger_interval_s" : 5,
             "trigger_expiration_s" : 60
@@ -247,12 +261,13 @@ class TimingController:
 class I2CController:
     def __init__(self):
         self.I2C_bus_access = Semaphore(1)
+        self.I2C_bus = board.I2C()
     
     async def read_sdc41(self, callback: Callable[[float],None]):
         try:
             self.I2C_bus_access.acquire()
-            #insert sdc41 reading logic here
-            callback(0)
+            ret = await co2_scd41.read_scd41(self.I2C_bus)
+            callback(ret.co2)
         finally:
             self.I2C_bus_access.release()
 
@@ -260,8 +275,8 @@ class I2CController:
     async def read_htu2x(self,callback: Callable[[float,float],None]):
         try:
             self.I2C_bus_access.acquire()
-            #insert temperature and humidity reading logic here
-            callback(0,0)
+            ret = await htu2x.read_htu2x(self.I2C_bus)
+            callback(ret.temperature,ret.humidity)
         finally:
             self.I2C_bus_access.release()
         
@@ -269,8 +284,8 @@ class I2CController:
     async def read_tsl2591(self,callback: Callable[[float],None]):
         try:
             self.I2C_bus_access.acquire()
-            # insert light sensor reading logic here
-            callback(0)
+            ret = await tsl2591.read_tsl2591(self.I2C_bus)
+            callback(ret.lux_reading)
         finally:
             self.I2C_bus_access.release()
 

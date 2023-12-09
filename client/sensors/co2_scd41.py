@@ -21,7 +21,6 @@ async def read_scd41(i2c_bus, timeout = datetime.timedelta(0,1,0) ) -> SCD41Read
             print("CO2: %d ppm" % scd4x.CO2)
             print("Temperature: %0.1f *C" % scd4x.temperature)
             print("Humidity: %0.1f %%" % scd4x.relative_humidity)
-            print()
 
             return SCD41Reading(co2=scd4x.CO2, temperature=scd4x.temperature, humidity=scd4x.relative_humidity)
         else:
