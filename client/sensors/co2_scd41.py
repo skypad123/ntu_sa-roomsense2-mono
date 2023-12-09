@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import time
 import board
 from adafruit_scd4x import SCD4X
 import datetime

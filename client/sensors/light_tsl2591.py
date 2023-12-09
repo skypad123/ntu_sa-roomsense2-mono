@@ -1,9 +1,7 @@
 
 from dataclasses import dataclass
-import time
 import board
 from adafruit_tsl2591 import TSL2591
-import datetime
 import asyncio
 
 @dataclass
