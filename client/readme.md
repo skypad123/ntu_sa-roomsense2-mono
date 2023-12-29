@@ -43,12 +43,6 @@ eval "$(pyenv init -)"```to the bottom of the file and save the buffer
 30.   run the cmd `poetry install` to install the dependencies for the current project
 31.   run the cmd `python main.py` to run the project
 32.   configuration of the client is now completed
-    
-### Optional: Checking of I2C sensors connections
-1.    run the cmd ```sudo apt-get install i2c-tools``` to install i2cdetect tools
-2.    run the cmd ```sudo raspi-config``` to ensure that 'ARM I2C Interface' is enabled under 'Interface Options'
-3.    run the cmd ```sudo i2cdetect -y 1``` to scan and check for all i2c based sensors (29,40,48,62)
-
 
 ### install script for mic
 1.    run the cmd ```sudo pip3 install --upgrade adafruit-python-shell``` to install adafruit-shell
@@ -57,8 +51,22 @@ eval "$(pyenv init -)"```to the bottom of the file and save the buffer
 4.    type `y` and enter to have the i2s mic module support to be load at boot
 5.    type `y` and enter to reboot rpi
 
+###
+
+
+
+### Optional: Checking of I2C sensors connections
+1.    run the cmd ```sudo apt-get install i2c-tools``` to install i2cdetect tools
+2.    run the cmd ```sudo raspi-config``` to ensure that 'ARM I2C Interface' is enabled under 'Interface Options'
+3.    run the cmd ```sudo i2cdetect -y 1``` to scan and check for all i2c based sensors (29,40,48,62)
+
+### Optional: Download file for view/monitoring
+scp rpi@192.168.1.207:~/git-projects/ntu_sa-roomsense2-mono/client/temp/image.jpg ~/Desktop/image.jpg 
+
 
 enable gpio
+enable legacy camera
+
 
 ### Configuration References
 - running rpi headless -
@@ -74,6 +82,7 @@ https://github.com/adafruit/Adafruit_CircuitPython_TSL2591
 https://github.com/adafruit/Adafruit_CircuitPython_HTU21D
 https://files.waveshare.com/upload/2/2f/SGM58031.pdf
 https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-test
+https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html
 
 ### Modules
 - 3.3v 
