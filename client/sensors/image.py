@@ -3,7 +3,7 @@ from picamera import PiCamera
 
 import os
 
-os.chmod( "../temp/image.jpg", 755)
+os.chmod( "../temp", 755)
 
 camera = PiCamera()
 camera.resolution = (1024, 768)
