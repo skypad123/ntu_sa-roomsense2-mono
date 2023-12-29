@@ -10,4 +10,4 @@ camera.resolution = (1024, 768)
 camera.start_preview()
 # Camera warm-up time
 sleep(2)
-camera.capture('image.jpg')
+camera.capture('temp/image.jpg')
