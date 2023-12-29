@@ -23,7 +23,7 @@ and optionally, the hostname under general section.
                libbz2-dev libreadline-dev libsqlite3-dev 
                wget curl llvm libncursesw5-dev xz-utils 
                tk-dev libxml2-dev libxmlsec1-dev libffi-dev 
-               liblzma-dev git python3-pip libc6``` to install essential build tools
+               liblzma-dev git python3-pip libc6 python3-dev gcc`` to install essential build tools
 16.  run the cmd ```sudo raspi-config``` to enable 'ARM I2C Interface' under 'Interface Options'
 17.  run the cmd ```sudo apt-get install git``` to install git
 18.   run the cmd ```sudo apt-get install python3-pip``` to install pip, the python package manager
@@ -57,6 +57,8 @@ eval "$(pyenv init -)"```to the bottom of the file and save the buffer
 4.    type `y` and enter to have the i2s mic module support to be load at boot
 5.    type `y` and enter to reboot rpi
 
+
+enable gpio
 
 ### Configuration References
 - running rpi headless -
