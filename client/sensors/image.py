@@ -1,9 +1,9 @@
 from time import sleep
 from picamera import PiCamera
 
-import os
+# import os
 
-os.chmod( "../temp", 755)
+# os.chmod( "../temp", 755)
 
 camera = PiCamera()
 camera.resolution = (1024, 768)
