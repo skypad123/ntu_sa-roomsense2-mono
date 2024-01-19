@@ -1,13 +1,13 @@
-from time import sleep
 from picamera import PiCamera
 
-# import os
+class RpiCamera:
+    
+    def __init__(self, file_location = "temp/image.jpg"):
+        self.file_location = file_location
+        self.camera = PiCamera()
+        self.camera.resolution = (1024, 768)
+        
+    def capture(self):
+        self.camera.capture(self.file_location)
 
-# os.chmod( "../temp", 755)
-
-camera = PiCamera()
-camera.resolution = (1024, 768)
-camera.start_preview()
-# Camera warm-up time
-sleep(2)
-camera.capture('/temp/image.jpg')
+        

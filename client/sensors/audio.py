@@ -1,108 +1,37 @@
-#!/usr/bin/env python3
-"""Creating an asyncio generator for blocks of audio data.
+import pyaudio
+import wave
 
-This example shows how a generator can be used to analyze audio input blocks.
-In addition, it shows how a generator can be created that yields not only input
-blocks but also output blocks where audio data can be written to.
+class RpiMic: 
 
-You need Python 3.7 or newer to run this.
+    def __init__(self, format= pyaudio.paInt16, \
+    device_index = 1, audio_channel =2 , samp_rate = 44100, \
+    chunk = 4096, file_location = 'temp/audio.wav'):
+        self.format = format
+        self.device_index = device_index
+        self.audio_channel = audio_channel
+        self.samp_rate = samp_rate
+        self.chunk = chunk
+        self.file_location = file_location
+        self.mic = pyaudio.PyAudio()
 
-"""
-import asyncio
-import queue
-import sys
+    def capture(self, record_len = 2):
+        stream = self.mic.open(format = self.format,rate = self.samp_rate,\
+        channels = self.audio_channel, input_device_index = self.device_index, \
+        input = True, frames_per_buffer=self.chunk)
 
-import numpy as np
-import sounddevice as sd
+        frames = []
+       # loop through stream and append audio chunks to frame array
+        for ii in range(0,int((self.samp_rate/self.chunk)* record_len)):
+            data = stream.read(self.chunk)
+            frames.append(data) 
+        stream.stop_stream()
+        stream.close()
 
-
-async def inputstream_generator(channels=1, **kwargs):
-    """Generator that yields blocks of input data as NumPy arrays."""
-    q_in = asyncio.Queue()
-    loop = asyncio.get_event_loop()
-
-    def callback(indata, frame_count, time_info, status):
-        loop.call_soon_threadsafe(q_in.put_nowait, (indata.copy(), status))
-
-    stream = sd.InputStream(callback=callback, channels=channels, **kwargs)
-    with stream:
-        while True:
-            indata, status = await q_in.get()
-            yield indata, status
-
-
-async def stream_generator(blocksize, *, channels=1, dtype='float32',
-                           pre_fill_blocks=10, **kwargs):
-    """Generator that yields blocks of input/output data as NumPy arrays.
-
-    The output blocks are uninitialized and have to be filled with
-    appropriate audio signals.
-
-    """
-    assert blocksize != 0
-    q_in = asyncio.Queue()
-    q_out = queue.Queue()
-    loop = asyncio.get_event_loop()
-
-    def callback(indata, outdata, frame_count, time_info, status):
-        loop.call_soon_threadsafe(q_in.put_nowait, (indata.copy(), status))
-        outdata[:] = q_out.get_nowait()
-
-    # pre-fill output queue
-    for _ in range(pre_fill_blocks):
-        q_out.put(np.zeros((blocksize, channels), dtype=dtype))
-
-    stream = sd.Stream(blocksize=blocksize, callback=callback, dtype=dtype,
-                       channels=channels, **kwargs)
-    with stream:
-        while True:
-            indata, status = await q_in.get()
-            outdata = np.empty((blocksize, channels), dtype=dtype)
-            yield indata, outdata, status
-            q_out.put_nowait(outdata)
+        wavefile = wave.open(self.file_location,'wb')
+        wavefile.setnchannels(self.audio_channel)
+        wavefile.setsampwidth(self.mic.get_sample_size(format))
+        wavefile.setframerate(self.samp_rate)
+        wavefile.writeframes(b''.join(frames))
+        wavefile.close()
 
 
-async def print_input_infos(**kwargs):
-    """Show minimum and maximum value of each incoming audio block."""
-    async for indata, status in inputstream_generator(**kwargs):
-        if status:
-            print(status)
-        print('min:', indata.min(), '\t', 'max:', indata.max())
-
-
-async def wire_coro(**kwargs):
-    """Create a connection between audio inputs and outputs.
-
-    Asynchronously iterates over a stream generator and for each block
-    simply copies the input data into the output block.
-
-    """
-    async for indata, outdata, status in stream_generator(**kwargs):
-        if status:
-            print(status)
-        outdata[:] = indata
-
-
-async def main(**kwargs):
-    print('Some informations about the input signal:')
-    try:
-        await asyncio.wait_for(print_input_infos(), timeout=2)
-    except asyncio.TimeoutError:
-        pass
-    print('\nEnough of that, activating wire ...\n')
-    audio_task = asyncio.create_task(wire_coro(**kwargs))
-    for i in range(10, 0, -1):
-        print(i)
-        await asyncio.sleep(1)
-    audio_task.cancel()
-    try:
-        await audio_task
-    except asyncio.CancelledError:
-        print('\nwire was cancelled')
-
-
-if __name__ == "__main__":
-    try:
-        asyncio.run(main(blocksize=1024))
-    except KeyboardInterrupt:
-        sys.exit('\nInterrupted by user')

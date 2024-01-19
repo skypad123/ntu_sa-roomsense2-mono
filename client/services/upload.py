@@ -1,11 +1,11 @@
 
 import requests 
-from dotenv import load_dotenv
 from datetime import datetime
 import os 
 import json
 import logging
 import sys
+from dotenv import load_dotenv
 from getmac import get_mac_address as gma # mac address
 from typing import Optional, Callable
 from dataclasses import dataclass
@@ -136,7 +136,6 @@ class TimeseriesLog:
             ret["objectId"] = self.objectId
         return ret
     
-
 async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: str, sensor: str , data: HT|B|CHT|I|A): 
     url = backend_url + "/update/log"
 
@@ -147,13 +146,10 @@ async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: 
         'Content-Type': 'application/json'
     }
     
-    response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
+    res = requests.request("POST", url, headers=headers, data=json.dumps(payload))
 
-    logging.debug(response.text)
-    return response.json()
-
-
-
+    logging.debug(res.text)
+    return res.json()
 
 def register_device(base_url:str,device_location: Optional[str] ,sensors: Optional[list[str]]):
     
@@ -164,14 +160,29 @@ def register_device(base_url:str,device_location: Optional[str] ,sensors: Option
     if sensors is not None:
         json_data["sensors"] = sensors
     res = requests.post( f"{base_url}/update/device", json=json_data)
-    print(res.json())
+
+    logging.debug(res.text)
+    return res.json()
 
 
-def upload_image():
-    pass
+def upload_image(base_url:str):
+    url = f"{base_url}/upload/image"
+    files = {'file': open('temp/image.jpg', 'rb')}
 
-def upload_audio():
-    pass
+    res = requests.post(url, files=files, timeout=30)
+    
+    logging.debug(res.text)
+    return res.json()
+
+
+def upload_audio(base_url:str):
+    url = f"{base_url}/upload/audio"
+    files = {'file': open('temp/audio.wav', 'rb')}
+
+    res = requests.post(url, files=files, timeout=30)
+    
+    logging.debug(res.text)
+    return res.json()
 
 
 if __name__ == "__main__":

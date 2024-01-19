@@ -68,6 +68,18 @@ enable gpio
 enable legacy camera
 
 
+
+
+### I2C Modules
+- 3.3v 
+  - TSL2591 : Light Sensor - i2c addr  0x29
+  - HTU2x : Humidity Sensor - i2c addr 0x40
+  - SDC41: Co2 sensor - i2c addr 0x62
+
+
+
+pip install numpy
+
 ### Configuration References
 - running rpi headless -
 https://learn.sparkfun.com/tutorials/headless-raspberry-pi-setup/wifi-with-dhcp#:~:text=Enable%20WiFi,wpa_supplicant%2F%20directory%20in%20the%20filesystem.
@@ -84,14 +96,4 @@ https://files.waveshare.com/upload/2/2f/SGM58031.pdf
 https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-test
 https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html
 
-### Modules
-- 3.3v 
-  - TSL2591 : Light Sensor - i2c addr  0x29
-  - HTU2x : Humidity Sensor - i2c addr 0x40
-- 5.0v 
-  - SDC41: Co2 sensor - i2c addr 0x62
-
-
-
-sudo apt install libc6
-
+https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/
