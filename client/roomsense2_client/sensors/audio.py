@@ -29,7 +29,7 @@ class RpiMic:
 
         wavefile = wave.open(self.file_location,'wb')
         wavefile.setnchannels(self.audio_channel)
-        wavefile.setsampwidth(self.mic.get_sample_size(format))
+        wavefile.setsampwidth(self.mic.get_sample_size(self.format))
         wavefile.setframerate(self.samp_rate)
         wavefile.writeframes(b''.join(frames))
         wavefile.close()
