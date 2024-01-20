@@ -63,6 +63,8 @@
 4.    type `y` and enter to have the i2s mic module support to be load at boot
 5.    type `y` and enter to reboot rpi
 
+sudo apt install python3-pyaudio
+
 ### Optional actions
 
 #### Debugging: Checking I2C Interface
