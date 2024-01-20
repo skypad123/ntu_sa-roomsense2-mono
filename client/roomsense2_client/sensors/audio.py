@@ -4,7 +4,7 @@ import wave
 class RpiMic: 
 
     def __init__(self, format= pyaudio.paInt16, \
-    device_index = 1, audio_channel =2 , samp_rate = 44100, \
+    device_index = 0, audio_channel =2 , samp_rate = 44100, \
     chunk = 4096, file_location = 'temp/audio.wav'):
         self.format = format
         self.device_index = device_index
@@ -36,13 +36,13 @@ class RpiMic:
 
 if __name__ == "__main__":
 
-    p = pyaudio.PyAudio()
-    info = p.get_host_api_info_by_index(0)
-    numdevices = info.get('deviceCount')
+    # p = pyaudio.PyAudio()
+    # info = p.get_host_api_info_by_index(0)
+    # numdevices = info.get('deviceCount')
 
-    for i in range(0, numdevices):
-        if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-            print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
+    # for i in range(0, numdevices):
+    #     if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+    #         print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
             
-    # mic = RpiMic(file_location="temp/audio.wav")
-    # mic.capture(record_len=60)
+    mic = RpiMic(file_location="temp/audio.wav")
+    mic.capture(record_len=60)
