@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "roomsense2-client"
+name = "roomsense2_client"
 version = "0.1.0"
 description = ""
 authors = ["Sky Livingston <skypad123@gmail.com>"]

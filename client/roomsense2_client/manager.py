@@ -6,9 +6,9 @@ import logging
 from threading import Thread, Semaphore
 from datetime import datetime, timedelta
 from collections import defaultdict
-import sensors.co2_scd41 as co2_scd41
-import sensors.humidity_temp_htu2x as htu2x
-import sensors.light_tsl2591 as tsl2591
+import roomsense2_client.sensors.co2_scd41 as co2_scd41
+import roomsense2_client.sensors.humidity_temp_htu2x as htu2x
+import roomsense2_client.sensors.light_tsl2591 as tsl2591
 import asyncio
 
 @dataclass

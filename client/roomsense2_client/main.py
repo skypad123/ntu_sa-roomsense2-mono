@@ -1,4 +1,4 @@
-from manager import ActionManager , TimingController
+from roomsense2_client.manager import ActionManager , TimingController
 from threading import Thread
 import logging
 import sys
