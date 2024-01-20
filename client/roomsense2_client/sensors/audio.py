@@ -4,7 +4,7 @@ import wave
 class RpiMic: 
 
     def __init__(self, format= pyaudio.paInt16, \
-    device_index = 0, audio_channel =2 , samp_rate = 44100, \
+    device_index = 0, audio_channel = 1 , samp_rate = 44100, \
     chunk = 1024, file_location = 'temp/audio.wav'):
         self.format = format
         self.device_index = device_index
