@@ -46,6 +46,20 @@
   eval "$(pyenv virtualenv-init -)" ``` to the bottom of the file and save the buffer
   -  reconnect the ssh session for PATH to take effect
 
+
+#### Install driver for mic
+1.    run the cmd ```sudo pip3 install --upgrade adafruit-python-shell``` to install adafruit-shell
+2.    run the cmd ```wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2smic.py``` to download script
+3.    run the cmd ```sudo python3 i2smic.py``` to run the installation script
+4.    type `y` and enter to have the i2s mic module support to be load at boot
+5.    type `y` and enter to reboot rpi
+
+###  Install python interface to mic driver
+sudo apt-get install python3-pyaudio
+sudo apt-get install portaudio19-dev
+
+
+### run the application
   - run the cmd ```cd ~ && mkdir git-projects && cd git-projects``` to create project dir and target it
   - run the cmd ```git clone "https://github.com/skypad123/ntu_sa-roomsense2-mono.git"``` to clone the project into the rpi the git-projects folder
   - run the cmd ```cd ntu_sa-roomsense2-client/client``` to target project folder
@@ -55,15 +69,6 @@
   - run the cmd `poetry install` to install the dependencies for the current project
   - run the cmd `python main.py` to run the project
   - configuration of the client is now completed
-
-#### Install driver for mic
-1.    run the cmd ```sudo pip3 install --upgrade adafruit-python-shell``` to install adafruit-shell
-2.    run the cmd ```wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2smic.py``` to download script
-3.    run the cmd ```sudo python3 i2smic.py``` to run the installation script
-4.    type `y` and enter to have the i2s mic module support to be load at boot
-5.    type `y` and enter to reboot rpi
-
-sudo apt install python3-pyaudio
 
 ### Optional actions
 
