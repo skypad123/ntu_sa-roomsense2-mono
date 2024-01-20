@@ -15,7 +15,7 @@ class RpiMic:
 
     def capture(self, record_len = 2):
         p = pyaudio.PyAudio()
-        stream = self.mic.open(format = self.format,rate = self.samp_rate,\
+        stream = p.open(format = self.format,rate = self.samp_rate,\
         channels = self.audio_channel, input_device_index = self.device_index, \
         input = True, frames_per_buffer=self.chunk)
 
