@@ -4,64 +4,75 @@
 ## Headless Client Software Configuration
 ### Step-by-step Instructions
 
-1. install rpi imager @ https://www.raspberrypi.com/software/
-2. mount rpi SD card
-3. run the rpi imager
-4. select `Raspberry Pi Zero 2w` as the device
-5. select `Raspberry Pi OS Lite(Legacy)` as the operating system.
-6. select the rpi SD card as the storage device
-7. on clicking next, edit the setting such as the username and password of the rpi admin as well as entering wlan config information for network connectivity
-and optionally, the hostname under general section.
-8. enable ssh using password auth under the services sections
-9. flash the SD by clicking `Yes`
-10.  insert sd card into rpi, and wait for rpi to connect to wifi stated in flashing state
-11.  in the terminal use either the cmd ```arp -a``` to find the rpi's ip address or any alternative ip scanner 
-12.  ssh into rpi via terminal with the cmd ```ssh <admin-username>@<rpi-ip_address>```
-13.  enter the admin account's password stated in the flashing state when prompted
-14.  run the cmd ```sudo apt-get upgrade && sudo apt-get update``` to update and upgrade the apt package manager
-15.  run the cmd ```sudo apt install make build-essential libssl-dev zlib1g-dev 
-               libbz2-dev libreadline-dev libsqlite3-dev 
-               wget curl llvm libncursesw5-dev xz-utils 
-               tk-dev libxml2-dev libxmlsec1-dev libffi-dev 
-               liblzma-dev git python3-pip libc6 python3-dev gcc`` to install essential build tools
-16.  run the cmd ```sudo raspi-config``` to enable 'ARM I2C Interface' under 'Interface Options'
-17.  run the cmd ```sudo apt-get install git``` to install git
-18.   run the cmd ```sudo apt-get install python3-pip``` to install pip, the python package manager
-19.    run the cmd ```sudo pip3 install virtualenv``` to install virtualenv, the python virtual environment manager
-20.   run the cmd ```curl https://pyenv.run | bash``` to install pyenv, the python version manager 
-21.   run the cmd ```curl -sSL https://install.python-poetry.org | python3 -``` to install poetry
-22.   run the cmd ```nano ~/.bashrc``` to open PATH config and add the line ```export PATH="/home/rpi/.local/bin:$PATH"``` and ```export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"```to the bottom of the file and save the buffer
-23.   reconnect the ssh session for PATH to take effect
-24.   run the cmd ```cd ~ && mkdir git-projects && cd git-projects``` to create project dir and target it
-25.   run the cmd ```git clone "https://github.com/skypad123/ntu_sa-roomsense2-client.git"``` to clone the project into the rpi the git-projects folder
-26.   run the cmd ```cd ntu_sa-roomsense2-client``` to target project folder
-27.   run the cmd ```pyenv install 3.11``` to install the latest python3.11 version used in the project; this step will take a while
-28.   run the cmd `pyenv local 3.11.x` to set the correct local env for the project folder
-29.   run the cmd `poetry shell` to run the venv for current project
-30.   run the cmd `poetry install` to install the dependencies for the current project
-31.   run the cmd `python main.py` to run the project
-32.   configuration of the client is now completed
+#### Flash RPI Zero
+  1. install rpi imager @ https://www.raspberrypi.com/software/
+  2. mount rpi SD card
+  3. run the rpi imager
+  4. select `Raspberry Pi Zero w` as the device
+  5. select `Raspberry Pi OS Lite(Legacy)` as the operating system.
+  6. select the rpi SD card as the storage device
+  7. on clicking next, edit the setting such as the username and password of the rpi admin as well as entering wlan config information for network connectivity
+  and optionally, the hostname under general section.
+  8. enable ssh using password auth under the services sections
+  9. flash the SD by clicking `Yes`
+  10.  insert sd card into rpi, and wait for rpi to connect to wifi stated in flashing state
 
-### install script for mic
+#### Setup RPI Zero
+  11.  in the terminal use either the cmd ```arp -a``` to find the rpi's ip address or any alternative ip scanner 
+  12.  ssh into rpi via terminal with the cmd ```ssh <admin-username>@<rpi-ip_address>```
+  13.  enter the admin account's password stated in the flashing state when prompted
+  14.  run the cmd ```sudo apt-get upgrade && sudo apt-get update``` to update and upgrade the apt package manager
+  15.  run the cmd ```sudo apt install make build-essential libssl-dev zlib1g-dev 
+                libbz2-dev libreadline-dev libsqlite3-dev 
+                wget curl llvm libncursesw5-dev xz-utils 
+                tk-dev libxml2-dev libxmlsec1-dev libffi-dev 
+                liblzma-dev git python3-pip libc6 python3-dev gcc``` to install essential build tools
+  16.  run the cmd ```sudo raspi-config``` to enable 'ARM I2C Interface' & 'Legacy Camera' under 'Interface Options'
+
+
+#### Install git & python/pip
+  - run the cmd ```sudo apt-get install git python3-pip``` to install git
+  <!-- 18.   run the cmd ```sudo apt-get install python3-pip``` to install pip, the python package manager -->
+  - run the cmd ```sudo pip3 install virtualenv``` to install virtualenv, the python virtual environment manager
+
+#### Install poetry
+  - run the cmd ```curl -sSL https://install.python-poetry.org | python3 -``` to install poetry
+
+#### Install pyenv
+  -   run the cmd ```curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash``` to install pyenv, the python version manager 
+  -  run the cmd ```nano ~/.bashrc``` to open PATH config and add the line ``` export PYENV_ROOT="$HOME/.pyenv"
+  [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)" ``` to the bottom of the file and save the buffer
+  -  reconnect the ssh session for PATH to take effect
+
+  - run the cmd ```cd ~ && mkdir git-projects && cd git-projects``` to create project dir and target it
+  - run the cmd ```git clone "https://github.com/skypad123/ntu_sa-roomsense2-mono.git"``` to clone the project into the rpi the git-projects folder
+  - run the cmd ```cd ntu_sa-roomsense2-client/client``` to target project folder
+  - run the cmd ```pyenv install 3.11``` to install the latest python3.11 version used in the project; this step will take a while
+  - run the cmd `pyenv local 3.11.x` to set the correct local env for the project folder
+  - run the cmd `poetry shell` to run the venv for current project
+  - run the cmd `poetry install` to install the dependencies for the current project
+  - run the cmd `python main.py` to run the project
+  - configuration of the client is now completed
+
+#### Install driver for mic
 1.    run the cmd ```sudo pip3 install --upgrade adafruit-python-shell``` to install adafruit-shell
 2.    run the cmd ```wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2smic.py``` to download script
 3.    run the cmd ```sudo python3 i2smic.py``` to run the installation script
 4.    type `y` and enter to have the i2s mic module support to be load at boot
 5.    type `y` and enter to reboot rpi
 
-###
+### Optional actions
 
+#### Debugging: Checking I2C Interface
+  1.    run the cmd ```sudo apt-get install i2c-tools``` to install i2cdetect tools
+  2.    run the cmd ```sudo raspi-config``` to ensure that 'ARM I2C Interface' is enabled under 'Interface Options'
+  3.    run the cmd ```sudo i2cdetect -y 1``` to scan and check for all i2c based sensors (29,40,48,62)
 
-
-### Optional: Checking of I2C sensors connections
-1.    run the cmd ```sudo apt-get install i2c-tools``` to install i2cdetect tools
-2.    run the cmd ```sudo raspi-config``` to ensure that 'ARM I2C Interface' is enabled under 'Interface Options'
-3.    run the cmd ```sudo i2cdetect -y 1``` to scan and check for all i2c based sensors (29,40,48,62)
-
-### Optional: Download file for view/monitoring
-scp rpi@192.168.1.207:~/git-projects/ntu_sa-roomsense2-mono/client/temp/image.jpg ~/Desktop/image.jpg 
+#### Debugging: Download file for view/monitoring
+  1. ```scp <admin>@<ip-address>:~/git-projects/ntu_sa-roomsense2-mono/client/temp/image.jpg ~/Desktop/image.jpg ```
+<!-- scp rpi@192.168.1.207:~/git-projects/ntu_sa-roomsense2-mono/client/temp/image.jpg ~/Desktop/image.jpg  -->
 
 
 enable gpio
@@ -97,3 +108,4 @@ https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wi
 https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html
 
 https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/
+

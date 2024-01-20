@@ -1,12 +1,11 @@
 from fastapi import FastAPI, UploadFile
 from fastapi.exceptions import HTTPException
-
+from dotenv import load_dotenv, dotenv_values
 from roomsense2.s3 import S3Interface
 from roomsense2.fmt import *
 from roomsense2.mongodb import *
 from roomsense2.errors import *
 from roomsense2.s3 import *
-from dotenv import load_dotenv, dotenv_values
 
 load_dotenv()
 config = dotenv_values(".env")
