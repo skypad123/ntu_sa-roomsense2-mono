@@ -45,4 +45,4 @@ if __name__ == "__main__":
     #         print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
             
     mic = RpiMic(file_location="temp/audio.wav")
-    mic.capture(record_len=60)
+    mic.capture(record_len=10)
