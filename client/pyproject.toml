@@ -3,7 +3,7 @@ name = "roomsense2-client"
 version = "0.1.0"
 description = ""
 authors = ["Sky Livingston <skypad123@gmail.com>"]
-readme = "README.md"
+readme = "readme.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
