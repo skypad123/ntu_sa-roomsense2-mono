@@ -35,5 +35,5 @@ class RpiMic:
         wavefile.close()
 
 if __name__ == "__main__":
-    mic = RpiMic(file_location="./temp/audio.wav")
+    mic = RpiMic(file_location="audio.wav")
     mic.capture()
