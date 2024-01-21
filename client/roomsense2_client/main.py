@@ -1,4 +1,4 @@
-from roomsense2_client.manager import ActionManager , TimingController
+from roomsense2_client.manager import ActionManager , TimingController, ActionManagerConfig
 from roomsense2_client.services.upload import insert_device
 from threading import Thread
 import asyncio
@@ -41,13 +41,16 @@ root.addHandler(handler)
 load_dotenv()
 config = dotenv_values(".env")
 backend_url = config["API_ENDPOINT"]
+device_name = config["DEVICE_NAME"]
 
 p = Thread(target=asyncio.run, \
         args=((insert_device(backend_url))))
 p.start()
 p.join()
 
-action_manager = ActionManager()
+action_config = ActionManagerConfig(backend_url, device_name)
+
+action_manager = ActionManager(action_config)
 timing_controller = TimingController()
 timing_controller.attach(action_manager)
 timing_controller.start()

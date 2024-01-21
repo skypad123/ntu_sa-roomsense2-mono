@@ -9,6 +9,7 @@ from collections import defaultdict
 import roomsense2_client.sensors.co2_scd41 as co2_scd41
 import roomsense2_client.sensors.humidity_temp_htu2x as htu2x
 import roomsense2_client.sensors.light_tsl2591 as tsl2591
+import roomsense2_client.services.upload as upload
 import asyncio
 
 @dataclass
@@ -51,6 +52,8 @@ class HCSRC5031TriggerAction(AbstractAction):
 class SCD41ReturnAction(AbstractAction):
     #CO2 sensor
     co2: float
+    temperature: float
+    humidity: float
     reading_time: datetime
 
 @dataclass
@@ -69,13 +72,25 @@ class TSL2591ReturnAction(AbstractAction):
 @dataclass
 class RPICAMReturnAction(AbstractAction):
     #Image Camera
-    image: bytes
+    image_location: str
     reading_time: datetime
 
 @dataclass
 class RPIMICReturnAction(AbstractAction):
+    #Audio Recording
+    recording_location: str
+    reading_time: datetime
+
+@dataclass
+class RPICAMAssetUploadReloadAction(AbstractAction):
     #Image Camera
-    recording: bytes
+    bucket_location: str
+    reading_time: datetime
+
+@dataclass
+class RPIMICAssetUploadReloadAction(AbstractAction):
+    #Audio Recording
+    bucket_location: str
     reading_time: datetime
 
 @dataclass
@@ -85,15 +100,25 @@ class HCSRC5031ReturnAction(AbstractAction):
     reading_time: datetime
 
 
+@dataclass
+class ActionManagerConfig:
+    backend_url: str
+    device_name: str
+
+
 class ActionManager(Thread):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, config:ActionManagerConfig, *args, **kwargs):
         super(ActionManager, self).__init__(*args, **kwargs)
+        self.config = config
         self.action_queue = Queue()
         self.I2CController = I2CController()
         self.RpiCameraController = RpiCameraController()
         self.RpiMicController = RpiMicController()
         self.MotionSensorController = MotionSensorController()
+
+        #state
+        self.motion_state = False
         
     def add_action(self, Action):
         self.action_queue.put(Action, block=True, timeout=1)
@@ -128,88 +153,154 @@ class ActionManager(Thread):
             'TSL2591ReturnAction': self.process_tsl2591_return_action,
             'RPICAMReturnAction': self.process_rpicam_return_action,
             'RPIMICReturnAction': self.process_rpimic_return_action,
-            'HCSRC5031ReturnAction': self.process_hcsrc5031_return_action
+            'HCSRC5031ReturnAction': self.process_hcsrc5031_return_action,
+            'RPICAMAssetUploadReloadAction': self.process_rpicam_asset_upload_reload_action,
+            'RPIMICAssetUploadReloadAction': self.process_rpimic_asset_upload_reload_action
         }
         if action_type in action_handlers:
             action_handlers[action_type](action)
 
     def process_sdc41_trigger_action(self,Action):
-        def callback(co2_reading):
-            logging.debug(f"callback triggered with co2_reading: {co2_reading}")
-            self.add_action(SCD41ReturnAction(expire_datetime=Action.expire_datetime, co2 = co2_reading, reading_time=datetime.now()))
+        def callback(ret : co2_scd41.SCD41Reading):
+            logging.debug(f"callback triggered with co2_reading: {ret.co2}, temp_reading: {ret.temperature}, humidity_reading: {ret.humidity}")
+            self.add_action(SCD41ReturnAction(expire_datetime=Action.expire_datetime, co2 = ret.co2, temperature=ret.temperature, humidity=ret.humidity, reading_time=datetime.now()))
         Thread(target = asyncio.run , args=(self.I2CController.read_sdc41(callback),)).start()
 
     def process_htu2x_trigger_action(self,Action):
-        def callback(temp_reading, humidity_reading):
-            logging.debug(f"callback triggered with temp_reading: {temp_reading}, humidity_reading: {humidity_reading}")
-            self.add_action(HTU2XReturnAction(expire_datetime=Action.expire_datetime, temperature = temp_reading, humidity = humidity_reading, reading_time=datetime.now()))
+        def callback(ret: htu2x.HTU21DReading):
+            logging.debug(f"callback triggered with temp_reading: {ret.temperature}, humidity_reading: {ret.humidity}")
+            self.add_action(HTU2XReturnAction(expire_datetime=Action.expire_datetime, temperature = ret.temperature, humidity = ret.humidity, reading_time=datetime.now()))
         Thread(target = asyncio.run , args=(self.I2CController.read_htu2x(callback),)).start()
         
     def process_tsl2591_trigger_action(self,Action):
-        def callback(lux_reading):
-            logging.debug(f"callback triggered with lux_reading: {lux_reading}")
-            self.add_action(TSL2591ReturnAction(expire_datetime=Action.expire_datetime, lux = lux_reading, reading_time=datetime.now()))
+        def callback(ret: tsl2591.TSL2591Reading):
+            logging.debug(f"callback triggered with lux_reading: {ret.lux_reading}")
+            self.add_action(TSL2591ReturnAction(expire_datetime=Action.expire_datetime, lux = ret.lux_reading, reading_time=datetime.now()))
         Thread(target = asyncio.run, args=(self.I2CController.read_tsl2591(callback),)).start()
     
     def process_rpicam_trigger_action(self,Action):
         def callback(image):
             logging.debug(f"callback triggered with image: {image}")
-            self.add_action(RPICAMReturnAction(expire_datetime=Action.expire_datetime, image = image, reading_time=datetime.now()))
+            self.add_action(RPICAMReturnAction(expire_datetime=Action.expire_datetime, image_location = "temp/image.jpg", reading_time=datetime.now()))
         Thread(target = asyncio.run, args=(self.RpiCameraController.take_picture(callback),)).start()
 
     def process_rpimic_trigger_action(self,Action):
         def callback(recording):
             logging.debug(f"callback triggered with recording: {recording}")
-            self.add_action(RPIMICReturnAction(expire_datetime=Action.expire_datetime, recording=recording , reading_time=datetime.now()))
+            self.add_action(RPIMICReturnAction(expire_datetime=Action.expire_datetime, recording_location = "temp/audio.wav" , reading_time=datetime.now()))
         Thread(target = asyncio.run, args=(self.RpiMicController.take_recording(callback),)).start()
 
     def process_hcsrc5031_trigger_action(self,Action):
-        def callback(motion_reading):
-            logging.debug(f"callback triggered with motion: {motion_reading}")
-            self.add_action(HCSRC5031ReturnAction(expire_datetime=Action.expire_datetime, motion = motion_reading, reading_time=datetime.now()))
+        def callback(ret: bool):
+            logging.debug(f"callback triggered with motion: {ret}")
+            self.add_action(HCSRC5031ReturnAction(expire_datetime=Action.expire_datetime, motion = ret, reading_time=datetime.now()))
         Thread(target = asyncio.run, args=(self.MotionSensorController.read_motion(callback),)).start()
 
-    #TODO: implement server communication
-    def process_sdc41_return_action(self,Action):
+    def process_sdc41_return_action(self,action: SCD41ReturnAction):
         #insert spawn new thread to send data to server
-        async def print_sdc41():
-            logging.info(f"returning co2 : {Action.co2}")
-        Thread(target= asyncio.run, args=(print_sdc41(),)).start()
+        async def upload_sdc41_data():
+            backend_url = self.config.backend_url
+            device_name = self.config.device_name
+            sensor_name = "SCD41"
+            timestamp = action.reading_time
+            data = upload.Co2HumidityTemperature(co2=action.co2, humidity=action.humidity, temperature=action.temperature)
+            logging.info(f"uploading sdc41 data : {action}")
+            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
-    #TODO: implement server communication
-    def process_htu2x_return_action(self,Action):
-        #insert spawn new thread to send data to server
-        async def print_htu2x():
-            logging.info(f"returning temp : {Action.temperature}, humidity : {Action.humidity}")
-        Thread(target= asyncio.run, args = (print_htu2x(),)).start()
+        Thread(target= asyncio.run, args=(upload_sdc41_data(),)).start()
 
-    #TODO: implement server communication
-    def process_tsl2591_return_action(self,Action):
+    def process_htu2x_return_action(self,action: HTU2XReturnAction):
         #insert spawn new thread to send data to server
-        async def print_tsl2591():
-            logging.info(f"returning lux : {Action.lux}")
-        Thread( target= asyncio.run, args =(print_tsl2591(),)).start()
+        async def upload_htu2x_data():
+            backend_url = self.config.backend_url
+            device_name = self.config.device_name
+            sensor_name = "HTU2X"
+            timestamp = action.reading_time
+            data = upload.HumidityTemperature(humidity=action.humidity, temperature=action.temperature)
+            logging.info(f"uploading htu2x data : {action}")
+            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
-    #TODO: implement server communication
-    def process_rpicam_return_action(self,Action):
-        #insert spawn new thread to send data to server
-        async def print_rpicam():
-            logging.info(f"returning image : {Action.image}")
-        Thread(target= asyncio.run, args =(print_rpicam(),)).start()
+        Thread(target= asyncio.run, args = (upload_htu2x_data(),)).start()
 
-    #TODO: implement server communication
-    def process_rpimic_return_action(self,Action):
+    def process_tsl2591_return_action(self,action: TSL2591ReturnAction):
         #insert spawn new thread to send data to server
-        async def print_rpimic():
-            logging.info(f"returning recording : {Action.recording}")
-        Thread(target= asyncio.run, args =(print_rpimic(),)).start()
+        async def upload_tsl2591_data():
+            backend_url = self.config.backend_url
+            device_name = self.config.device_name
+            sensor_name = "TSL2591"
+            timestamp = action.reading_time
+            data = upload.Brightness(brightness=action.lux)
+            logging.info(f"uploading tsl2591 data : {action}")
+            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
-    #TODO: implement server communication
-    def process_hcsrc5031_return_action(self,Action):
+        Thread( target= asyncio.run, args =(upload_tsl2591_data(),)).start()
+
+    #TODO: test returned link
+    def process_rpicam_return_action(self,action: RPICAMReturnAction):
         #insert spawn new thread to send data to server
-        async def print_hcsrc5031():
-            logging.info(f"returning motion : {Action.motion}")
-        Thread(target= asyncio.run, args =(print_hcsrc5031(),)).start()
+        async def upload_image():
+            backend_url = self.config.backend_url
+            logging.info(f"uploading image")
+            ret = await upload.upload_image(backend_url)
+            ### get link fromt ret
+            link = ret.result.link
+            if link is not None:
+                self.add_action(RPICAMAssetUploadReloadAction(expire_datetime=action.expire_datetime, bucket_location = link, reading_time=datetime.now()))
+            
+        Thread(target= asyncio.run, args =(upload_image(),)).start()
+
+    #TODO: test returned link
+    def process_rpimic_return_action(self,action):
+        #insert spawn new thread to send data to server
+        async def upload_audio():
+            backend_url = self.config.backend_url
+            logging.info(f"uploading audio")
+            ret = await upload.upload_audio(backend_url)
+            ### get link fromt ret
+            link = ret.result.link
+            if link is not None:
+                self.add_action(RPIMICAssetUploadReloadAction(expire_datetime=action.expire_datetime, bucket_location = link, reading_time=datetime.now()))
+
+        Thread(target= asyncio.run, args =(upload_audio(),)).start()
+
+    def process_hcsrc5031_return_action(self,action: HCSRC5031ReturnAction):
+        #insert spawn new thread to send data to server
+        async def trigger_image_capture():
+            if  action.motion == True and self.motion_state == False:
+                logging.info(f"motion detected, tirggering recording")
+                self.motion_state = True
+                self.add_action(RPICAMTriggerAction(expire_datetime=datetime.now() + timedelta(seconds=60))) 
+            elif action.motion == False:
+                self.motion_state = False
+
+        Thread(target= asyncio.run, args =(trigger_image_capture(),)).start()
+
+    def process_rpicam_asset_upload_reload_action(self,action: RPICAMAssetUploadReloadAction):
+        #insert spawn new thread to send data to server
+        async def upload_rpicam_asset_as_timeseries():
+            backend_url = self.config.backend_url
+            device_name = self.config.device_name
+            sensor_name = "IMAGE"
+            timestamp = action.reading_time
+            data = upload.Image(image_location=action.bucket_location)
+            logging.info(f"uploading rpicam asset as timeseries : {action}")
+            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+
+        Thread(target= asyncio.run, args =(upload_rpicam_asset_as_timeseries(),)).start()
+
+    def process_rpimic_asset_upload_reload_action(self,action: RPIMICAssetUploadReloadAction):
+        #insert spawn new thread to send data to server
+        async def upload_rpimic_asset_as_timeseries():
+            backend_url = self.config.backend_url
+            device_name = self.config.device_name
+            sensor_name = "AUDIO"
+            timestamp = action.reading_time
+            data = upload.Audio(audio_location=action.bucket_location)
+            logging.info(f"uploading rpimic asset as timeseries : {action}")
+            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+
+        Thread(target= asyncio.run, args =(upload_rpimic_asset_as_timeseries(),)).start()
+
 
 ## Timing Controller - produces trigger action for acction manager
 class TimingController(Thread):
@@ -295,41 +386,32 @@ class I2CController:
         self.I2C_bus_access = Semaphore(1)
         # self.I2C_bus = board.I2C()
     
-    async def read_sdc41(self, callback: Callable[[float],None]):
+    async def read_sdc41(self, callback: Callable[[co2_scd41.SCD41Reading],None]):
         try:
             self.I2C_bus_access.acquire()
             logging.debug("semaphore control: sdc41 acquired bus")
-            # ret = await co2_scd41.read_scd41(self.I2C_bus)
-            await dummy_async_fn("read_sdc41")
-            ret = co2_scd41.SCD41Reading(co2=0,temperature=0,humidity=0)
-            callback(ret.co2)
+            ret = await co2_scd41.read_scd41(self.I2C_bus)
+            callback(ret)
         finally:
             self.I2C_bus_access.release()
             logging.debug("semaphore control: released bus")
 
-
-    async def read_htu2x(self,callback: Callable[[float,float],None]):
+    async def read_htu2x(self,callback: Callable[[htu2x.HTU21DReading],None]):
         try:
             self.I2C_bus_access.acquire()
             logging.debug("semaphore control: htu2x acquired bus")
-            # ret = await htu2x.read_htu2x(self.I2C_bus)
-            # ret = htu2x.HTU2XReading(temperature=0,humidity=0)
-            await dummy_async_fn("read_htu2x")
-            ret = htu2x.HTU21DReading(temperature=0,humidity=0)
-            callback(ret.temperature,ret.humidity)
+            ret = await htu2x.read_htu2x(self.I2C_bus)
+            callback(ret)
         finally:
             self.I2C_bus_access.release()
             logging.debug("semaphore control: htu2x released bus")
         
-
-    async def read_tsl2591(self,callback: Callable[[float],None]):
+    async def read_tsl2591(self,callback: Callable[[tsl2591.TSL2591Reading],None]):
         try:
             self.I2C_bus_access.acquire()
             logging.debug("semaphore control:tsl2591 acquired bus")
-            # ret = await tsl2591.read_tsl2591(self.I2C_bus)
-            await dummy_async_fn("read_tsl2591")
-            ret = tsl2591.TSL2591Reading(lux_reading=0,infrared=0,visible=0,full_spectrum=0)
-            callback(ret.lux_reading)
+            ret = await tsl2591.read_tsl2591(self.I2C_bus)
+            callback(ret)
         finally:
             self.I2C_bus_access.release()
             logging.debug("semaphore control:tsl2591 released bus")
@@ -338,12 +420,12 @@ class RpiCameraController:
     def __init__(self):
         self.rpi_camera_access = Semaphore(1)
 
-    async def take_picture(self,callback: Callable[[bytes],None]):
+    async def take_picture(self,callback: Callable[[None],None]):
         try:
             self.rpi_camera_access.acquire()
             logging.debug("semaphore control: rpi camera acquired")
             # insert rpi camera capture logic here
-            callback(bytes([0]))
+            callback()
         finally:
             self.rpi_camera_access.release()
             logging.debug("semaphore control: rpi camera released")
@@ -352,12 +434,12 @@ class RpiMicController:
     def __init__(self):
         self.rpi_mic_access = Semaphore(1)
 
-    async def take_recording(self,callback: Callable[[bytes],None]):
+    async def take_recording(self,callback: Callable[[None],None]):
         try:
             self.rpi_mic_access.acquire()
             logging.debug("semaphore control: rpi mic acquired")
             # insert rpi camera capture logic here
-            callback(bytes([0]))
+            callback()
         finally:
             self.rpi_mic_access.release()
             logging.debug("semaphore control: rpi mic released")
