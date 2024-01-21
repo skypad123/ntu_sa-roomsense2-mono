@@ -284,7 +284,7 @@ class ActionManager(Thread):
             device_name = self.config.device_name
             sensor_name = "IMAGE"
             timestamp = action.reading_time
-            data = upload.Image(image_location=action.bucket_location)
+            data = upload.Image( imageUrl=action.bucket_location)
             logging.info(f"uploading rpicam asset as timeseries : {action}")
             upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
@@ -297,7 +297,7 @@ class ActionManager(Thread):
             device_name = self.config.device_name
             sensor_name = "AUDIO"
             timestamp = action.reading_time
-            data = upload.Audio(audio_location=action.bucket_location)
+            data = upload.Audio( audioUrl=action.bucket_location)
             logging.info(f"uploading rpimic asset as timeseries : {action}")
             upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
