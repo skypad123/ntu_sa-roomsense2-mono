@@ -43,10 +43,7 @@ config = dotenv_values(".env")
 backend_url = config["API_ENDPOINT"]
 device_name = config["DEVICE_NAME"]
 
-p = Thread(target=asyncio.run, \
-        args=((insert_device(backend_url))))
-p.start()
-p.join()
+asyncio.run(insert_device(backend_url))
 
 action_config = ActionManagerConfig(backend_url, device_name)
 

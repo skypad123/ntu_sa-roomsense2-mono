@@ -462,7 +462,6 @@ class RpiMicController:
 class MotionSensorController:
     def __init__(self):
         self.motion_sensor_access = Semaphore(1)
-        self.RP
 
     async def read_motion(self, callback: Callable[[bool],None]):
         try:
