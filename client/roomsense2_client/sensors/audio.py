@@ -37,57 +37,57 @@ class RpiMic:
 
 if __name__ == "__main__":
 
-    # p = pyaudio.PyAudio()
-    # info = p.get_host_api_info_by_index(0)
-    # numdevices = info.get('deviceCount')
+    p = pyaudio.PyAudio()
+    info = p.get_host_api_info_by_index(0)
+    numdevices = info.get('deviceCount')
 
-    # for i in range(0, numdevices):
-    #     if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-    #         print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
+    for i in range(0, numdevices):
+        if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+            print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
             
     # mic = RpiMic(file_location="temp/audio.wav")
     # mic.capture(record_len=10)
 
 
  
-    chunk = 1024      # Each chunk will consist of 1024 samples
-    sample_format = pyaudio.paInt16      # 16 bits per sample
-    channels = 2      # Number of audio channels
-    fs = 44100        # Record at 44100 samples per second
-    time_in_seconds = 3
-    filename = "soundsample.wav"
+    # chunk = 1024      # Each chunk will consist of 1024 samples
+    # sample_format = pyaudio.paInt16      # 16 bits per sample
+    # channels = 2      # Number of audio channels
+    # fs = 44100        # Record at 44100 samples per second
+    # time_in_seconds = 3
+    # filename = "soundsample.wav"
     
-    p = pyaudio.PyAudio()  # Create an interface to PortAudio
+    # p = pyaudio.PyAudio()  # Create an interface to PortAudio
     
-    print('-----Now Recording-----')
+    # print('-----Now Recording-----')
     
-    #Open a Stream with the values we just defined
-    stream = p.open(format=sample_format,
-                    channels = channels,
-                    rate = fs,
-                    frames_per_buffer = chunk,
-                    input = True)
+    # #Open a Stream with the values we just defined
+    # stream = p.open(format=sample_format,
+    #                 channels = channels,
+    #                 rate = fs,
+    #                 frames_per_buffer = chunk,
+    #                 input = True)
     
-    frames = []  # Initialize array to store frames
+    # frames = []  # Initialize array to store frames
     
-    # Store data in chunks for 3 seconds
-    for i in range(0, int(fs / chunk * time_in_seconds)):
-        data = stream.read(chunk)
-        frames.append(data)
+    # # Store data in chunks for 3 seconds
+    # for i in range(0, int(fs / chunk * time_in_seconds)):
+    #     data = stream.read(chunk)
+    #     frames.append(data)
     
-    # Stop and close the Stream and PyAudio
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+    # # Stop and close the Stream and PyAudio
+    # stream.stop_stream()
+    # stream.close()
+    # p.terminate()
     
-    print('-----Finished Recording-----')
+    # print('-----Finished Recording-----')
     
-    # Open and Set the data of the WAV file
-    file = wave.open(filename, 'wb')
-    file.setnchannels(channels)
-    file.setsampwidth(p.get_sample_size(sample_format))
-    file.setframerate(fs)
+    # # Open and Set the data of the WAV file
+    # file = wave.open(filename, 'wb')
+    # file.setnchannels(channels)
+    # file.setsampwidth(p.get_sample_size(sample_format))
+    # file.setframerate(fs)
     
-    #Write and Close the File
-    file.writeframes(b''.join(frames))
-    file.close()
+    # #Write and Close the File
+    # file.writeframes(b''.join(frames))
+    # file.close()
