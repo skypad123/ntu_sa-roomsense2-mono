@@ -168,7 +168,7 @@ async def register_device(base_url:str,device_location: Optional[str] ,sensors: 
 
 async def upload_image(base_url:str):
     url = f"{base_url}/upload/image"
-    file = open('roomsense2_client/temp/image.jpg', 'rb')
+    file = open('temp/image.jpg', 'rb')
     files = {'file': ('image.jpg', file, 'image/jpeg')}
 
     res = requests.post(url, files=files, timeout=30)
@@ -178,7 +178,7 @@ async def upload_image(base_url:str):
 
 async def upload_audio(base_url:str):
     url = f"{base_url}/upload/audio"
-    file = open('roomsense2_client/temp/audio.wav', 'rb')
+    file = open('temp/audio.wav', 'rb')
     files = {'file': ('audio.wav', file, 'audio/wav')}
 
     res = requests.post(url, files=files, timeout=30)
