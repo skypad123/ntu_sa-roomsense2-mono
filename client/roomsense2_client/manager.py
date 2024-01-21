@@ -342,6 +342,8 @@ class TimingController(Thread):
         }
     }
 
+    exluded_actions = []
+
     def __init__(self, *args, **kwargs):
         super(TimingController, self).__init__(*args, **kwargs)
         self.last_trigger_time = defaultdict(lambda: None)
@@ -377,8 +379,10 @@ class TimingController(Thread):
 
 
     def run(self):
+        trigger_list = [ i for i in self.managed_actions if i not in self.exluded_actions]
+
         while(1):
-            for action_type in self.managed_actions:
+            for action_type in trigger_list:
                 self.check_for_trigger(action_type)
 
 ## Resource Controllers
