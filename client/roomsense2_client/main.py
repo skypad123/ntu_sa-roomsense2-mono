@@ -1,8 +1,10 @@
 from roomsense2_client.manager import ActionManager , TimingController
+from roomsense2_client.services.upload import insert_device
 from threading import Thread
+import asyncio
 import logging
 import sys
-
+from dotenv import load_dotenv, dotenv_values
 
 class CustomFormatter(logging.Formatter):
 
@@ -36,14 +38,21 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(CustomFormatter())
 root.addHandler(handler)
 
-def main(): 
-    action_manager = ActionManager()
-    timing_controller = TimingController()
-    timing_controller.attach(action_manager)
-    timing_controller.start()
-    action_manager.start()
-    timing_controller.join()
-    action_manager.join()
+load_dotenv()
+config = dotenv_values(".env")
+backend_url = config["API_ENDPOINT"]
+
+p = Thread(target=asyncio.run, \
+        args=((insert_device(backend_url))))
+p.start()
+p.join()
+
+action_manager = ActionManager()
+timing_controller = TimingController()
+timing_controller.attach(action_manager)
+timing_controller.start()
+action_manager.start()
+timing_controller.join()
+action_manager.join()
 
     
-main()

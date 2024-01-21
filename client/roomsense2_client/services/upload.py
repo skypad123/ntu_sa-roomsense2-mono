@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from getmac import get_mac_address as gma # mac address
 from typing import Optional, Callable
 from dataclasses import dataclass
+import threading
+import asyncio
 
 ## <-- component types for device information -->
 @dataclass
@@ -149,10 +151,9 @@ async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: 
     res = requests.request("POST", url, headers=headers, data=json.dumps(payload))
 
     logging.debug(res.text)
-    return res.json()
+    return res.json
 
-def register_device(base_url:str,device_location: Optional[str] ,sensors: Optional[list[str]]):
-    
+async def register_device(base_url:str,device_location: Optional[str] ,sensors: Optional[list[str]]):
     json_data = {
         "device": gma(),
         "userSetLocation": device_location,
@@ -162,27 +163,27 @@ def register_device(base_url:str,device_location: Optional[str] ,sensors: Option
     res = requests.post( f"{base_url}/update/device", json=json_data)
 
     logging.debug(res.text)
-    return res.json()
+    return res.json
 
 
-def upload_image(base_url:str):
+async def upload_image(base_url:str):
     url = f"{base_url}/upload/image"
-    files = {'file': open('temp/image.jpg', 'rb')}
+    file = open('roomsense2_client/temp/image.jpg', 'rb')
+    files = {'file': ('image.jpg', file, 'image/jpeg')}
 
     res = requests.post(url, files=files, timeout=30)
-    
-    logging.debug(res.text)
-    return res.json()
+    file.close()
+    return res.json
 
 
-def upload_audio(base_url:str):
+async def upload_audio(base_url:str):
     url = f"{base_url}/upload/audio"
-    files = {'file': open('temp/audio.wav', 'rb')}
+    file = open('roomsense2_client/temp/audio.wav', 'rb')
+    files = {'file': ('audio.wav', file, 'audio/wav')}
 
     res = requests.post(url, files=files, timeout=30)
-    
-    logging.debug(res.text)
-    return res.json()
+    file.close()
+    return res.json
 
 
 if __name__ == "__main__":
@@ -196,6 +197,13 @@ if __name__ == "__main__":
     root.addHandler(handler)
 
     load_dotenv()
-    backend_url = os.getenv("BACKEND_URL")
-    insert_timeseries(backend_url, datetime.now(), "prototype #1", "SCD41", CHT(co2=100, humidity=50, temperature=25))
+    backend_url = os.getenv("API_ENDPOINT")
+
+    p = threading.Thread(target=asyncio.run, \
+                        args=((insert_timeseries(backend_url, datetime.now(), "prototype #1", "SCD41", CHT(co2=100, humidity=50, temperature=25)),)))
+    # upload_image(backend_url)
+    # insert_timeseries(backend_url, datetime.now(), "prototype #1", "SCD41", CHT(co2=100, humidity=50, temperature=25))
+    p.start()
+    p.join()
+
 
