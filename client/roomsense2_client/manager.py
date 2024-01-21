@@ -384,7 +384,7 @@ class TimingController(Thread):
 class I2CController:
     def __init__(self):
         self.I2C_bus_access = Semaphore(1)
-        # self.I2C_bus = board.I2C()
+        self.I2C_bus = board.I2C()
     
     async def read_sdc41(self, callback: Callable[[co2_scd41.SCD41Reading],None]):
         try:
