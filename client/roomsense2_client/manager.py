@@ -245,8 +245,7 @@ class ActionManager(Thread):
             logging.info(f"uploading image")
             ret = await upload.upload_image(backend_url)
             ### get link fromt ret
-            logging.info(f"ret: {ret}")
-            link = ret.result.link
+            link = ret["result"]["link"]
             if link is not None:
                 self.add_action(RPICAMAssetUploadReloadAction(expire_datetime=action.expire_datetime, bucket_location = link, reading_time=datetime.now()))
             
@@ -260,7 +259,7 @@ class ActionManager(Thread):
             logging.info(f"uploading audio")
             ret = await upload.upload_audio(backend_url)
             ### get link fromt ret
-            link = ret.result.link
+            link = ret["result"]["link"]
             if link is not None:
                 self.add_action(RPIMICAssetUploadReloadAction(expire_datetime=action.expire_datetime, bucket_location = link, reading_time=datetime.now()))
 
