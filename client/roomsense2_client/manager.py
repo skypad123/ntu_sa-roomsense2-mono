@@ -11,6 +11,7 @@ import roomsense2_client.sensors.humidity_temp_htu2x as htu2x
 import roomsense2_client.sensors.light_tsl2591 as tsl2591
 import roomsense2_client.services.upload as upload
 import asyncio
+import board
 
 @dataclass
 class AbstractAction:
