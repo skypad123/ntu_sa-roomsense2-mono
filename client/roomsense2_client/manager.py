@@ -9,6 +9,7 @@ from collections import defaultdict
 import roomsense2_client.sensors.co2_scd41 as co2_scd41
 import roomsense2_client.sensors.humidity_temp_htu2x as htu2x
 import roomsense2_client.sensors.light_tsl2591 as tsl2591
+import roomsense2_client.sensors.image as image
 import roomsense2_client.services.upload as upload
 import asyncio
 import board
@@ -135,7 +136,7 @@ class ActionManager(Thread):
                     logging.debug(f"action popped from queue: {Action}")
                     self.process_actions(Action)
             except Exception as error:
-                logging.warning(f"{error}")
+                logging.warning(error)
                 # print("ActionManager: no actions in queue, sleeping for 1 second")
                 time.sleep(0.002)
                 
@@ -180,14 +181,14 @@ class ActionManager(Thread):
         Thread(target = asyncio.run, args=(self.I2CController.read_tsl2591(callback),)).start()
     
     def process_rpicam_trigger_action(self,Action):
-        def callback(image):
-            logging.debug(f"callback triggered with image: {image}")
+        def callback():
+            logging.debug(f"callback triggered with image")
             self.add_action(RPICAMReturnAction(expire_datetime=Action.expire_datetime, image_location = "temp/image.jpg", reading_time=datetime.now()))
         Thread(target = asyncio.run, args=(self.RpiCameraController.take_picture(callback),)).start()
 
     def process_rpimic_trigger_action(self,Action):
-        def callback(recording):
-            logging.debug(f"callback triggered with recording: {recording}")
+        def callback():
+            logging.debug(f"callback triggered with recording")
             self.add_action(RPIMICReturnAction(expire_datetime=Action.expire_datetime, recording_location = "temp/audio.wav" , reading_time=datetime.now()))
         Thread(target = asyncio.run, args=(self.RpiMicController.take_recording(callback),)).start()
 
@@ -431,12 +432,14 @@ class I2CController:
 class RpiCameraController:
     def __init__(self):
         self.rpi_camera_access = Semaphore(1)
+        self.rpi_camera= image.RpiCamera()
 
     async def take_picture(self,callback: Callable[[None],None]):
         try:
             self.rpi_camera_access.acquire()
             logging.debug("semaphore control: rpi camera acquired")
             # insert rpi camera capture logic here
+            self.rpi_camera.capture()
             callback()
         finally:
             self.rpi_camera_access.release()
@@ -459,6 +462,7 @@ class RpiMicController:
 class MotionSensorController:
     def __init__(self):
         self.motion_sensor_access = Semaphore(1)
+        self.RP
 
     async def read_motion(self, callback: Callable[[bool],None]):
         try:
