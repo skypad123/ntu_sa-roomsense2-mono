@@ -136,9 +136,9 @@ class ActionManager(Thread):
                     logging.debug(f"action popped from queue: {Action}")
                     self.process_actions(Action)
             except Exception as error:
-                logging.warning(error)
+                logging.warning("No actions in queue, sleeping for 0.5 second")
                 # print("ActionManager: no actions in queue, sleeping for 1 second")
-                time.sleep(0.002)
+                time.sleep(0.5)
                 
     def process_actions(self,action):
         logging.info(f"ActionManager: processing action {action}")
@@ -245,6 +245,7 @@ class ActionManager(Thread):
             logging.info(f"uploading image")
             ret = await upload.upload_image(backend_url)
             ### get link fromt ret
+            logging.info(f"ret: {ret}")
             link = ret.result.link
             if link is not None:
                 self.add_action(RPICAMAssetUploadReloadAction(expire_datetime=action.expire_datetime, bucket_location = link, reading_time=datetime.now()))
