@@ -286,7 +286,7 @@ class ActionManager(Thread):
             timestamp = action.reading_time
             data = upload.Image( imageUrl=action.bucket_location)
             logging.info(f"uploading rpicam asset as timeseries : {action}")
-            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
         Thread(target= asyncio.run, args =(upload_rpicam_asset_as_timeseries(),)).start()
 
@@ -299,7 +299,7 @@ class ActionManager(Thread):
             timestamp = action.reading_time
             data = upload.Audio( audioUrl=action.bucket_location)
             logging.info(f"uploading rpimic asset as timeseries : {action}")
-            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
         Thread(target= asyncio.run, args =(upload_rpimic_asset_as_timeseries(),)).start()
 
