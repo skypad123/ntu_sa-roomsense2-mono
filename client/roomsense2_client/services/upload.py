@@ -151,7 +151,7 @@ async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: 
     res = requests.request("POST", url, headers=headers, data=json.dumps(payload))
 
     logging.debug(res.text)
-    return res.json
+    return res.json()
 
 async def register_device(base_url:str,device_location: Optional[str] ,sensors: Optional[list[str]]):
     json_data = {
@@ -163,7 +163,7 @@ async def register_device(base_url:str,device_location: Optional[str] ,sensors: 
     res = requests.post( f"{base_url}/update/device", json=json_data)
 
     logging.debug(res.text)
-    return res.json
+    return res.json()
 
 
 async def upload_image(base_url:str):
@@ -173,7 +173,7 @@ async def upload_image(base_url:str):
 
     res = requests.post(url, files=files, timeout=30)
     file.close()
-    return res.json
+    return res.json()
 
 
 async def upload_audio(base_url:str):
@@ -183,7 +183,7 @@ async def upload_audio(base_url:str):
 
     res = requests.post(url, files=files, timeout=30)
     file.close()
-    return res.json
+    return res.json()
 
 
 if __name__ == "__main__":
