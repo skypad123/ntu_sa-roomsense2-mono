@@ -413,7 +413,7 @@ class I2CController:
         try:
             self.I2C_bus_access.acquire()
             logging.debug("semaphore control: htu2x acquired bus")
-            ret = await htu2x.read_htu2x(self.I2C_bus)
+            ret = await htu2x.read_htu21d(self.I2C_bus)
             callback(ret)
         finally:
             self.I2C_bus_access.release()
