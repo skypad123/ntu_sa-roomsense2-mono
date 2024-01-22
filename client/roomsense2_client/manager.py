@@ -207,7 +207,7 @@ class ActionManager(Thread):
             timestamp = action.reading_time
             data = upload.Co2HumidityTemperature(co2=action.co2, humidity=action.humidity, temperature=action.temperature)
             logging.info(f"uploading sdc41 data : {action}")
-            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
         Thread(target= asyncio.run, args=(upload_sdc41_data(),)).start()
 
@@ -220,7 +220,7 @@ class ActionManager(Thread):
             timestamp = action.reading_time
             data = upload.HumidityTemperature(humidity=action.humidity, temperature=action.temperature)
             logging.info(f"uploading htu2x data : {action}")
-            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
         Thread(target= asyncio.run, args = (upload_htu2x_data(),)).start()
 
@@ -233,7 +233,7 @@ class ActionManager(Thread):
             timestamp = action.reading_time
             data = upload.Brightness(brightness=action.lux)
             logging.info(f"uploading tsl2591 data : {action}")
-            upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
         Thread( target= asyncio.run, args =(upload_tsl2591_data(),)).start()
 
