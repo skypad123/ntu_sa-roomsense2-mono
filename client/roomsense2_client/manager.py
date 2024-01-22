@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional, Callable
-from queue import Queue, Empty
+from queue import Queue
 import time
 import logging
 from threading import Thread, Semaphore
@@ -10,9 +10,12 @@ import roomsense2_client.sensors.co2_scd41 as co2_scd41
 import roomsense2_client.sensors.humidity_temp_htu2x as htu2x
 import roomsense2_client.sensors.light_tsl2591 as tsl2591
 import roomsense2_client.sensors.image as image
+# import roomsense2_client.sensors.audio as audio
+import roomsense2_client.sensors.motion_hcsrc5031 as motion
 import roomsense2_client.services.upload as upload
 import asyncio
 import board
+
 
 @dataclass
 class AbstractAction:
@@ -216,7 +219,7 @@ class ActionManager(Thread):
         async def upload_htu2x_data():
             backend_url = self.config.backend_url
             device_name = self.config.device_name
-            sensor_name = "HTU2X"
+            sensor_name = "HTU21D"
             timestamp = action.reading_time
             data = upload.HumidityTemperature(humidity=action.humidity, temperature=action.temperature)
             logging.info(f"uploading htu2x data : {action}")
@@ -338,18 +341,18 @@ class TimingController(Thread):
             "trigger_expiration_s" : 60
         },
         "HCSRC5031TriggerAction" : {
-            "trigger_interval_s" : 1,
+            "trigger_interval_s" : 0.1,
             "trigger_expiration_s" : 60
         }
     }
 
     exluded_actions = [
-        #"SCD41TriggerAction",
-        #"HTU2XTriggerAction",
+        "SCD41TriggerAction",
+        "HTU2XTriggerAction",
         "TSL2591TriggerAction",
         # "RPICAMTriggerAction",
         "RPIMICTriggerAction",
-        "HCSRC5031TriggerAction"
+        #"HCSRC5031TriggerAction"
     ]
 
     def __init__(self, *args, **kwargs):
@@ -462,13 +465,15 @@ class RpiMicController:
 class MotionSensorController:
     def __init__(self):
         self.motion_sensor_access = Semaphore(1)
+        self.motion_sensor = motion.HCSRC5031()
 
     async def read_motion(self, callback: Callable[[bool],None]):
         try:
             self.motion_sensor_access.acquire()
             logging.debug("semaphore control: motion sensor acquired")
             # insert motion sensor reading logic here
-            callback(True)
+            motion = self.motion_sensor.read_motion()
+            callback(motion)
         finally:
             self.motion_sensor_access.release()
             logging.debug("semaphore control: motion sensor released")
