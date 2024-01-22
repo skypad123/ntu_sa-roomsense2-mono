@@ -318,15 +318,15 @@ class TimingController(Thread):
 
     managed_actions = {
         "SCD41TriggerAction" : {
-            "trigger_interval_s" : 5,
+            "trigger_interval_s" : 15,
             "trigger_expiration_s" : 60
         },
         "HTU2XTriggerAction" : {
-            "trigger_interval_s" : 5,
+            "trigger_interval_s" : 15,
             "trigger_expiration_s" : 60
         },
         "TSL2591TriggerAction" : {
-            "trigger_interval_s" : 5,
+            "trigger_interval_s" : 15,
             "trigger_expiration_s" : 60
         },
         "RPICAMTriggerAction" : {
