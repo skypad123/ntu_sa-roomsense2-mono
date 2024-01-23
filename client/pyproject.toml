@@ -1,9 +1,9 @@
 [tool.poetry]
-name = "roomsense2-client"
+name = "roomsense2_client"
 version = "0.1.0"
 description = ""
 authors = ["Sky Livingston <skypad123@gmail.com>"]
-readme = "README.md"
+readme = "readme.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -15,7 +15,11 @@ python-dotenv = "^1.0.0"
 adafruit-circuitpython-htu21d = "^0.11.13"
 adafruit-circuitpython-scd4x = "^1.4.1"
 adafruit-circuitpython-tsl2591 = "^1.3.11"
+adafruit-circuitpython-bh1750 = "^1.1.10"
 adafruit-blinka = "^8.27.0"
+rpi-gpio = "^0.7.1"
+picamera = "^1.13"
+pyaudio = "^0.2.14"
 
 [build-system]
 requires = ["poetry-core"]

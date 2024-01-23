@@ -96,7 +96,7 @@ class TimeseriesLog(BaseModel):
     timestamp: datetime.datetime
     metadata: Metadata
     objectId: Optional[str] = None
-    data: Optional[HT|B|CHT|I|A] = None
+    data: Optional[B|CHT|HT|I|A] = None
 
     def to_dict (self):        
         ret = {

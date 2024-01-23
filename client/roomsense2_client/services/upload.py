@@ -1,14 +1,16 @@
 
 import requests 
-from dotenv import load_dotenv
 from datetime import datetime
 import os 
 import json
 import logging
 import sys
+from dotenv import load_dotenv
 from getmac import get_mac_address as gma # mac address
 from typing import Optional, Callable
 from dataclasses import dataclass
+import threading
+import asyncio
 
 ## <-- component types for device information -->
 @dataclass
@@ -136,7 +138,6 @@ class TimeseriesLog:
             ret["objectId"] = self.objectId
         return ret
     
-
 async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: str, sensor: str , data: HT|B|CHT|I|A): 
     url = backend_url + "/update/log"
 
@@ -147,16 +148,12 @@ async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: 
         'Content-Type': 'application/json'
     }
     
-    response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
+    res = requests.request("POST", url, headers=headers, data=json.dumps(payload))
 
-    logging.debug(response.text)
-    return response.json()
+    logging.debug(res.text)
+    return res.json()
 
-
-
-
-def register_device(base_url:str,device_location: Optional[str] ,sensors: Optional[list[str]]):
-    
+async def register_device(base_url:str,device_location: Optional[str] ,sensors: Optional[list[str]]):
     json_data = {
         "device": gma(),
         "userSetLocation": device_location,
@@ -164,14 +161,29 @@ def register_device(base_url:str,device_location: Optional[str] ,sensors: Option
     if sensors is not None:
         json_data["sensors"] = sensors
     res = requests.post( f"{base_url}/update/device", json=json_data)
-    print(res.json())
+
+    logging.debug(res.text)
+    return res.json()
 
 
-def upload_image():
-    pass
+async def upload_image(base_url:str):
+    url = f"{base_url}/upload/image"
+    file = open('temp/image.jpg', 'rb')
+    files = {'file': ('image.jpg', file, 'image/jpeg')}
 
-def upload_audio():
-    pass
+    res = requests.post(url, files=files, timeout=30)
+    file.close()
+    return res.json()
+
+
+async def upload_audio(base_url:str):
+    url = f"{base_url}/upload/audio"
+    file = open('temp/audio.wav', 'rb')
+    files = {'file': ('audio.wav', file, 'audio/wav')}
+
+    res = requests.post(url, files=files, timeout=30)
+    file.close()
+    return res.json()
 
 
 if __name__ == "__main__":
@@ -185,6 +197,13 @@ if __name__ == "__main__":
     root.addHandler(handler)
 
     load_dotenv()
-    backend_url = os.getenv("BACKEND_URL")
-    insert_timeseries(backend_url, datetime.now(), "prototype #1", "SCD41", CHT(co2=100, humidity=50, temperature=25))
+    backend_url = os.getenv("API_ENDPOINT")
+
+    p = threading.Thread(target=asyncio.run, \
+                        args=((insert_timeseries(backend_url, datetime.now(), "prototype #1", "SCD41", CHT(co2=100, humidity=50, temperature=25)),)))
+    # upload_image(backend_url)
+    # insert_timeseries(backend_url, datetime.now(), "prototype #1", "SCD41", CHT(co2=100, humidity=50, temperature=25))
+    p.start()
+    p.join()
+
 
