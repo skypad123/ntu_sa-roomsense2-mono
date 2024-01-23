@@ -9,6 +9,7 @@ from collections import defaultdict
 import roomsense2_client.sensors.co2_scd41 as co2_scd41
 import roomsense2_client.sensors.humidity_temp_htu2x as htu2x
 import roomsense2_client.sensors.light_tsl2591 as tsl2591
+import roomsense2_client.sensors.light_bh1750 as bh1750
 import roomsense2_client.sensors.image as image
 # import roomsense2_client.sensors.audio as audio
 import roomsense2_client.sensors.motion_hcsrc5031 as motion
@@ -34,6 +35,11 @@ class HTU2XTriggerAction(AbstractAction):
 
 @dataclass
 class TSL2591TriggerAction(AbstractAction):
+    #Light sensor
+    pass
+
+@dataclass
+class BH1750TriggerAction(AbstractAction):
     #Light sensor
     pass
 
@@ -70,6 +76,12 @@ class HTU2XReturnAction(AbstractAction):
 
 @dataclass
 class TSL2591ReturnAction(AbstractAction):
+    #Light sensor
+    lux: float
+    reading_time: datetime
+
+@dataclass
+class BH1750ReturnAction(AbstractAction):
     #Light sensor
     lux: float
     reading_time: datetime
@@ -182,7 +194,13 @@ class ActionManager(Thread):
             logging.debug(f"callback triggered with lux_reading: {ret.lux_reading}")
             self.add_action(TSL2591ReturnAction(expire_datetime=Action.expire_datetime, lux = ret.lux_reading, reading_time=datetime.now()))
         Thread(target = asyncio.run, args=(self.I2CController.read_tsl2591(callback),)).start()
-    
+
+    def process_bh1750_trigger_action(self,Action):
+        def callback(ret: bh1750.BH1750Reading):
+            logging.debug(f"callback triggered with lux_reading: {ret.lux_reading}")
+            self.add_action(BH1750ReturnAction(expire_datetime=Action.expire_datetime, lux = ret.lux_reading, reading_time=datetime.now()))
+        Thread(target = asyncio.run, args=(self.I2CController.read_bh1750(callback),)).start()
+
     def process_rpicam_trigger_action(self,Action):
         def callback():
             logging.debug(f"callback triggered with image")
@@ -240,7 +258,19 @@ class ActionManager(Thread):
 
         Thread( target= asyncio.run, args =(upload_tsl2591_data(),)).start()
 
-    #TODO: test returned link
+    def process_bh1750_return_action(self,action: BH1750ReturnAction):
+        #insert spawn new thread to send data to server
+        async def upload_bh1750_data():
+            backend_url = self.config.backend_url
+            device_name = self.config.device_name
+            sensor_name = "BH1750"
+            timestamp = action.reading_time
+            data = upload.Brightness(brightness=action.lux)
+            logging.info(f"uploading bh1750 data : {action}")
+            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+
+        Thread(target= asyncio.run, args =(upload_bh1750_data(),)).start()
+
     def process_rpicam_return_action(self,action: RPICAMReturnAction):
         #insert spawn new thread to send data to server
         async def upload_image():
@@ -254,7 +284,6 @@ class ActionManager(Thread):
             
         Thread(target= asyncio.run, args =(upload_image(),)).start()
 
-    #TODO: test returned link
     def process_rpimic_return_action(self,action):
         #insert spawn new thread to send data to server
         async def upload_audio():
@@ -314,6 +343,7 @@ class TimingController(Thread):
         "SCD41TriggerAction" : SCD41TriggerAction,
         "HTU2XTriggerAction" : HTU2XTriggerAction,
         "TSL2591TriggerAction" : TSL2591TriggerAction,
+        "BH1750TriggerAction" : BH1750TriggerAction,
         "RPICAMTriggerAction" : RPICAMTriggerAction,
         "RPIMICTriggerAction" : RPIMICTriggerAction,
         "HCSRC5031TriggerAction" : HCSRC5031TriggerAction
@@ -329,6 +359,10 @@ class TimingController(Thread):
             "trigger_expiration_s" : 60
         },
         "TSL2591TriggerAction" : {
+            "trigger_interval_s" : 15,
+            "trigger_expiration_s" : 60
+        },
+        "BH1750TriggerAction" : {
             "trigger_interval_s" : 15,
             "trigger_expiration_s" : 60
         },
@@ -350,9 +384,10 @@ class TimingController(Thread):
         "SCD41TriggerAction",
         "HTU2XTriggerAction",
         "TSL2591TriggerAction",
-        # "RPICAMTriggerAction",
+        #"BH1750TriggerAction",
+        "RPICAMTriggerAction",
         "RPIMICTriggerAction",
-        #"HCSRC5031TriggerAction"
+        "HCSRC5031TriggerAction"
     ]
 
     def __init__(self, *args, **kwargs):
@@ -431,6 +466,16 @@ class I2CController:
         finally:
             self.I2C_bus_access.release()
             logging.debug("semaphore control:tsl2591 released bus")
+
+    async def read_bh1750(self,callback: Callable[[bh1750.BH1750Reading],None]):
+        try:
+            self.I2C_bus_access.acquire()
+            logging.debug("semaphore control:bh1750 acquired bus")
+            ret = await bh1750.read_bh1750(self.I2C_bus)
+            callback(ret)
+        finally:
+            self.I2C_bus_access.release()
+            logging.debug("semaphore control:bh1750 released bus")
 
 class RpiCameraController:
     def __init__(self):
