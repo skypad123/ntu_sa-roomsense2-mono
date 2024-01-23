@@ -2,7 +2,7 @@
 
 
 
-## Enviroment File Temple
+## Enviroment File Template
 
 ```
 # give the device a uniqiue name used to filter its data in the database
