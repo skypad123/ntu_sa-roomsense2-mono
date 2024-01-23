@@ -117,13 +117,13 @@ pcm.dmic_sv {
 
 #### run the application
   - run the cmd ```git clone "https://github.com/skypad123/ntu_sa-roomsense2-mono.git"``` to clone the project into the rpi 
-  - run the cmd ```cd ntu_sa-roomsense2-mono/client/roomsense2_client``` to target project folder
+  - run the cmd ```cd ntu_sa-roomsense2-mono/client``` to target project folder
   - run the cmd ```pyenv install 3.11``` to install the latest python3.11 version used in the project; this step will take a while
   - run the cmd `pyenv local 3.11.x` to set the correct local env for the project folder
   - run the cmd `poetry shell` to run the venv for current project
   - copy .env file into the dir via ``` nano .env```.
   - run the cmd `poetry install` to install the dependencies for the current project
-  - run the cmd `python main.py` to run the project
+  - run the cmd `python roomsense2_client/main.py` to run the project
   - configuration of the client is now completed
 
 ### Optional actions
