@@ -137,10 +137,10 @@ pcm.dmic_sv {
   1. run  ```scp <admin>@<ip-address>:~/git-projects/ntu_sa-roomsense2-mono/client/temp/image.jpg ~/Desktop/image.jpg ``` to copy the temp image file to local computer
 
 
-
 ### I2C Modules
 - 3.3v 
   - TSL2591 : Light Sensor - i2c addr  0x29
+  - BH1750 : Light Sensor - i2x addr 0x23
   - HTU2x : Humidity Sensor - i2c addr 0x40
   - SDC41: Co2 sensor - i2c addr 0x62
   - 
