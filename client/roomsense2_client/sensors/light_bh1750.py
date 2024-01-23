@@ -8,9 +8,9 @@ import asyncio
 class BH1750Reading:
     lux_reading : float
 
-async def read_bh1750(self, i2c_bus) -> BH1750Reading:
-    self.sensor = BH1750(self.i2c)
-    return BH1750Reading(lux_reading=self.sensor.lux)
+async def read_bh1750( i2c_bus) -> BH1750Reading:
+    sensor = BH1750(i2c_bus)
+    return BH1750Reading(lux_reading=sensor.lux)
 
 if __name__ == "__main__":
     i2c = board.I2C()
