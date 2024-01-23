@@ -383,13 +383,13 @@ class TimingController(Thread):
     }
 
     exluded_actions = [
-        "SCD41TriggerAction",
-        "HTU2XTriggerAction",
+        #"SCD41TriggerAction",
+        #"HTU2XTriggerAction",
         "TSL2591TriggerAction",
         #"BH1750TriggerAction",
-        "RPICAMTriggerAction",
-        "RPIMICTriggerAction",
-        "HCSRC5031TriggerAction"
+        #"RPICAMTriggerAction",
+        #"RPIMICTriggerAction",
+        #"HCSRC5031TriggerAction"
     ]
 
     def __init__(self, *args, **kwargs):
