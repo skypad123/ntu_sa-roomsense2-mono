@@ -18,6 +18,22 @@ Adafruit-PureIO = ">=1.1.7"
 pyftdi = ">=0.40.0"
 
 [[package]]
+name = "adafruit-circuitpython-bh1750"
+version = "1.1.10"
+description = "CircuitPython library for use with the Adafruit BH1750 breakout"
+optional = false
+python-versions = "*"
+files = [
+    {file = "adafruit-circuitpython-bh1750-1.1.10.tar.gz", hash = "sha256:288152e97411d66aa749132274f434d24295600b3a3a7fe573fd16873d082ab3"},
+    {file = "adafruit_circuitpython_bh1750-1.1.10-py3-none-any.whl", hash = "sha256:a87c32ef479d43293d29e39d709ca48b006edc081d83149c6c2f18b9a5df485e"},
+]
+
+[package.dependencies]
+Adafruit-Blinka = "*"
+adafruit-circuitpython-busdevice = "*"
+adafruit-circuitpython-register = "*"
+
+[[package]]
 name = "adafruit-circuitpython-busdevice"
 version = "5.2.6"
 description = "CircuitPython bus device classes to manage bus sharing."
@@ -46,6 +62,23 @@ files = [
 [package.dependencies]
 Adafruit-Blinka = "*"
 adafruit-circuitpython-busdevice = "*"
+
+[[package]]
+name = "adafruit-circuitpython-register"
+version = "1.9.18"
+description = "CircuitPython data descriptor classes to represent hardware registers on I2C and SPI devices."
+optional = false
+python-versions = "*"
+files = [
+    {file = "adafruit-circuitpython-register-1.9.18.tar.gz", hash = "sha256:146fdec0ca787663962e1a894a3028056f1adbd0322a1d187bdeda739e4e228d"},
+    {file = "adafruit_circuitpython_register-1.9.18-py3-none-any.whl", hash = "sha256:fc84e55129c32e65e740c37f821efb1a6ab2b9439d2b27459c85a6017b0d9302"},
+]
+
+[package.dependencies]
+Adafruit-Blinka = "*"
+adafruit-circuitpython-busdevice = "*"
+adafruit-circuitpython-typing = ">=1.3.1,<2.dev0"
+typing-extensions = ">=4.0,<5.0"
 
 [[package]]
 name = "adafruit-circuitpython-requests"
@@ -511,4 +544,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "34dc9220ce4848f1856791099fb713dda35947b95ffc3a8dc141941b537ab9f8"
+content-hash = "cf47c9f3242e89b5953ffcb9477f827975e2287b29b4d0485f86af53020ae284"
