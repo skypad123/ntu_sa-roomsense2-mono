@@ -58,6 +58,11 @@ class HCSRC5031TriggerAction(AbstractAction):
     #Motion sensor
     pass
 
+@dataclass
+class MLX90640TriggerAction(AbstractAction):
+    #IR sensor
+    pass
+
 ## I2CReturnAction - marks return data from the I2C bus
 @dataclass
 class SCD41ReturnAction(AbstractAction):
@@ -114,6 +119,12 @@ class RPIMICAssetUploadReloadAction(AbstractAction):
 class HCSRC5031ReturnAction(AbstractAction):
     #Motion sensor
     motion: bool
+    reading_time: datetime
+
+@dataclass
+class MLX90640ReturnAction(AbstractAction):
+    #IR sensor
+    frame: list[float]
     reading_time: datetime
 
 
@@ -221,6 +232,12 @@ class ActionManager(Thread):
             self.add_action(HCSRC5031ReturnAction(expire_datetime=Action.expire_datetime, motion = ret, reading_time=datetime.now()))
         Thread(target = asyncio.run, args=(self.MotionSensorController.read_motion(callback),)).start()
 
+    def process_mlx90640_trigger_action(self,Action):
+        def callback(ret: co2_scd41.SCD41Reading):
+            logging.debug(f"callback triggered with co2_reading: {ret.co2}, temp_reading: {ret.temperature}, humidity_reading: {ret.humidity}")
+            self.add_action(MLX90640ReturnAction(expire_datetime=Action.expire_datetime, frame = ret.frame, reading_time=datetime.now()))
+        Thread(target = asyncio.run , args=(self.I2CController.read_mlx90640(callback),)).start()
+
     def process_sdc41_return_action(self,action: SCD41ReturnAction):
         #insert spawn new thread to send data to server
         async def upload_sdc41_data():
@@ -311,6 +328,19 @@ class ActionManager(Thread):
 
         Thread(target= asyncio.run, args =(trigger_image_capture(),)).start()
 
+    def process_ml90640_return_action(self,action: MLX90640ReturnAction):
+        #insert spawn new thread to send data to server
+        async def upload_mlx90640_data():
+            backend_url = self.config.backend_url
+            device_name = self.config.device_name
+            sensor_name = "MLX90640"
+            timestamp = action.reading_time
+            data = upload.IRFrame(frame=action.frame)
+            logging.info(f"uploading mlx90640 data : {action}")
+            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+
+        Thread(target= asyncio.run, args =(upload_mlx90640_data(),)).start()
+
     def process_rpicam_asset_upload_reload_action(self,action: RPICAMAssetUploadReloadAction):
         #insert spawn new thread to send data to server
         async def upload_rpicam_asset_as_timeseries():
@@ -336,6 +366,8 @@ class ActionManager(Thread):
             await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
 
         Thread(target= asyncio.run, args =(upload_rpimic_asset_as_timeseries(),)).start()
+    
+    
 
 
 ## Timing Controller - produces trigger action for acction manager
@@ -348,7 +380,8 @@ class TimingController(Thread):
         "BH1750TriggerAction" : BH1750TriggerAction,
         "RPICAMTriggerAction" : RPICAMTriggerAction,
         "RPIMICTriggerAction" : RPIMICTriggerAction,
-        "HCSRC5031TriggerAction" : HCSRC5031TriggerAction
+        "HCSRC5031TriggerAction" : HCSRC5031TriggerAction,
+        "MLX90640TriggerAction" : MLX90640TriggerAction
     }
 
     managed_actions = {
@@ -379,6 +412,10 @@ class TimingController(Thread):
         "HCSRC5031TriggerAction" : {
             "trigger_interval_s" : 0.1,
             "trigger_expiration_s" : 60
+        },
+        "MLX90640TriggerAction" : {
+            "trigger_interval_s" : 60,
+            "trigger_expiration_s" : 60
         }
     }
 
@@ -389,7 +426,8 @@ class TimingController(Thread):
         #"BH1750TriggerAction",
         #"RPICAMTriggerAction",
         #"RPIMICTriggerAction",
-        #"HCSRC5031TriggerAction"
+        #"HCSRC5031TriggerAction",
+        #"MLX90640TriggerAction"
     ]
 
     def __init__(self, *args, **kwargs):
@@ -478,6 +516,16 @@ class I2CController:
         finally:
             self.I2C_bus_access.release()
             logging.debug("semaphore control:bh1750 released bus")
+    
+    async def read_mlx90640(self,callback: Callable[[co2_scd41.SCD41Reading],None]):
+        try:
+            self.I2C_bus_access.acquire()
+            logging.debug("semaphore control: mlx90640 acquired bus")
+            ret = await co2_scd41.read_scd41(self.I2C_bus)
+            callback(ret)
+        finally:
+            self.I2C_bus_access.release()
+            logging.debug("semaphore control: mlx90640 released bus")
 
 class RpiCameraController:
     def __init__(self):
