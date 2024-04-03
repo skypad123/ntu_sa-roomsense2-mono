@@ -176,6 +176,7 @@ class ActionManager(Thread):
             'BH1750TriggerAction': self.process_bh1750_trigger_action,
             'RPICAMTriggerAction': self.process_rpicam_trigger_action,
             'RPIMICTriggerAction': self.process_rpimic_trigger_action,
+            'MLX90640TriggerAction': self.process_mlx90640_trigger_action,
             'HCSRC5031TriggerAction': self.process_hcsrc5031_trigger_action,
             'SCD41ReturnAction': self.process_sdc41_return_action,
             'HTU2XReturnAction': self.process_htu2x_return_action,
@@ -183,6 +184,7 @@ class ActionManager(Thread):
             'BH1750ReturnAction': self.process_bh1750_return_action,
             'RPICAMReturnAction': self.process_rpicam_return_action,
             'RPIMICReturnAction': self.process_rpimic_return_action,
+            'MLX90640ReturnAction': self.process_mlx90640_return_action,
             'HCSRC5031ReturnAction': self.process_hcsrc5031_return_action,
             'RPICAMAssetUploadReloadAction': self.process_rpicam_asset_upload_reload_action,
             'RPIMICAssetUploadReloadAction': self.process_rpimic_asset_upload_reload_action
@@ -290,7 +292,7 @@ class ActionManager(Thread):
 
         Thread(target= asyncio.run, args =(upload_bh1750_data(),)).start()
 
-    def process_ml90640_return_action(self,action: MLX90640ReturnAction):
+    def process_mlx90640_return_action(self,action: MLX90640ReturnAction):
         #insert spawn new thread to send data to server
         async def upload_mlx90640_data():
             backend_url = self.config.backend_url
@@ -372,7 +374,6 @@ class ActionManager(Thread):
 
 ## Timing Controller - produces trigger action for acction manager
 class TimingController(Thread):
-
     ref_dict = {
         "SCD41TriggerAction" : SCD41TriggerAction,
         "HTU2XTriggerAction" : HTU2XTriggerAction,
