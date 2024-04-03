@@ -424,7 +424,7 @@ class TimingController(Thread):
         #"HTU2XTriggerAction",
         "TSL2591TriggerAction",
         #"BH1750TriggerAction",
-        #"RPICAMTriggerAction",
+        "RPICAMTriggerAction",
         #"RPIMICTriggerAction",
         #"HCSRC5031TriggerAction",
         #"MLX90640TriggerAction"
