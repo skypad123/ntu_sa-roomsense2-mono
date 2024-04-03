@@ -519,7 +519,7 @@ class I2CController:
             self.I2C_bus_access.release()
             logging.debug("semaphore control:bh1750 released bus")
     
-    async def read_mlx90640(self,callback: Callable[[co2_scd41.SCD41Reading],None]):
+    async def read_mlx90640(self,callback: Callable[[mlx90640.MLX90640Reading],None]):
         try:
             self.I2C_bus_access.acquire()
             logging.debug("semaphore control: mlx90640 acquired bus")
