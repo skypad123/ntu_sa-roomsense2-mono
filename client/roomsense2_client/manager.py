@@ -141,8 +141,8 @@ class ActionManager(Thread):
         self.config = config
         self.action_queue = Queue()
         self.I2CController = I2CController()
-        self.RpiCameraController = RpiCameraController()
-        #self.RpiMicController = RpiMicController()
+        #self.RpiCameraController = RpiCameraController()
+        self.RpiMicController = RpiMicController()
         self.MotionSensorController = MotionSensorController()
 
         #state
