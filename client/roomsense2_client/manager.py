@@ -11,8 +11,9 @@ import roomsense2_client.sensors.humidity_temp_htu2x as htu2x
 import roomsense2_client.sensors.light_tsl2591 as tsl2591
 import roomsense2_client.sensors.light_bh1750 as bh1750
 import roomsense2_client.sensors.image as image
-# import roomsense2_client.sensors.audio as audio
+import roomsense2_client.sensors.audio as audio
 import roomsense2_client.sensors.motion_hcsrc5031 as motion
+import roomsense2_client.sensors.ir_mlx90640 as mlx90640
 import roomsense2_client.services.upload as upload
 import asyncio
 import board
@@ -235,8 +236,8 @@ class ActionManager(Thread):
         Thread(target = asyncio.run, args=(self.MotionSensorController.read_motion(callback),)).start()
 
     def process_mlx90640_trigger_action(self,Action):
-        def callback(ret: co2_scd41.SCD41Reading):
-            logging.debug(f"callback triggered with co2_reading: {ret.co2}, temp_reading: {ret.temperature}, humidity_reading: {ret.humidity}")
+        def callback(ret: mlx90640.MLX90640Reading):
+            logging.debug(f"callback triggered with ir_frame: {ret.frame}")
             self.add_action(MLX90640ReturnAction(expire_datetime=Action.expire_datetime, frame = ret.frame, reading_time=datetime.now()))
         Thread(target = asyncio.run , args=(self.I2CController.read_mlx90640(callback),)).start()
 
