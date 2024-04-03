@@ -33,6 +33,15 @@ class Brightness(BaseModel):
             "brightness": self.brightness
         }
     
+class IRImage(BaseModel):
+    frame: list[float]
+
+    def to_dict(self):
+        return {
+            "frame": self.frame
+        }
+
+    
 class Image(BaseModel):
     imageUrl: str
 
@@ -84,6 +93,7 @@ SCD30Data = Co2HumidityTemperature
 SCD40Data = Co2HumidityTemperature
 ImageData = Image
 AudioData = Audio
+MLX90640Data = IRImage
 
 #shorthand for OR operator typing on "data" field
 HT = HumidityTemperature
@@ -91,12 +101,13 @@ B = Brightness
 CHT = Co2HumidityTemperature
 I = Image
 A = Audio
+IR = IRImage
 
 class TimeseriesLog(BaseModel): 
     timestamp: datetime.datetime
     metadata: Metadata
     objectId: Optional[str] = None
-    data: Optional[B|CHT|HT|I|A] = None
+    data: Optional[B|CHT|HT|I|A|IR] = None
 
     def to_dict (self):        
         ret = {
