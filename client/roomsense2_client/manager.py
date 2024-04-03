@@ -290,6 +290,19 @@ class ActionManager(Thread):
 
         Thread(target= asyncio.run, args =(upload_bh1750_data(),)).start()
 
+    def process_ml90640_return_action(self,action: MLX90640ReturnAction):
+        #insert spawn new thread to send data to server
+        async def upload_mlx90640_data():
+            backend_url = self.config.backend_url
+            device_name = self.config.device_name
+            sensor_name = "MLX90640"
+            timestamp = action.reading_time
+            data = upload.IR(frame=action.frame)
+            logging.info(f"uploading mlx90640 data : {action}")
+            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
+
+        Thread(target= asyncio.run, args =(upload_mlx90640_data(),)).start()
+
     def process_rpicam_return_action(self,action: RPICAMReturnAction):
         #insert spawn new thread to send data to server
         async def upload_image():
@@ -327,19 +340,6 @@ class ActionManager(Thread):
                 self.motion_state = False
 
         Thread(target= asyncio.run, args =(trigger_image_capture(),)).start()
-
-    def process_ml90640_return_action(self,action: MLX90640ReturnAction):
-        #insert spawn new thread to send data to server
-        async def upload_mlx90640_data():
-            backend_url = self.config.backend_url
-            device_name = self.config.device_name
-            sensor_name = "MLX90640"
-            timestamp = action.reading_time
-            data = upload.IRFrame(frame=action.frame)
-            logging.info(f"uploading mlx90640 data : {action}")
-            await upload.insert_timeseries(backend_url, timestamp, device_name, sensor_name, data)
-
-        Thread(target= asyncio.run, args =(upload_mlx90640_data(),)).start()
 
     def process_rpicam_asset_upload_reload_action(self,action: RPICAMAssetUploadReloadAction):
         #insert spawn new thread to send data to server

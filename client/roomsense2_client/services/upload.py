@@ -84,6 +84,16 @@ class Brightness:
         return {
             "brightness": self.brightness
         }
+
+@dataclass   
+class IRImage:
+    frame: list[float]
+
+    def to_dict(self):
+        return {
+            "frame": self.frame
+        }
+
     
 @dataclass 
 class Image:
@@ -120,13 +130,14 @@ B = Brightness
 CHT = Co2HumidityTemperature
 I = Image
 A = Audio
+IR = IRImage
 
 @dataclass
 class TimeseriesLog: 
     timestamp: datetime
     metadata: Metadata
     objectId: Optional[str] = None
-    data: Optional[HT|B|CHT|I|A] = None
+    data: Optional[HT|B|CHT|I|A|IR] = None
 
     def to_dict (self):        
         ret = {
