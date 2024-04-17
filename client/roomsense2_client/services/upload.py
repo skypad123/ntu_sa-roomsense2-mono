@@ -45,7 +45,7 @@ async def insert_device(backend_url: str):
         sensors = sensors.split(",")
     payload = DeviceMeta(device=device_name, userSetLocation=user_set_location, sensors=sensors).to_dict()
 
-    response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
+    response = requests.request("POST", url, headers=headers, data=json.dumps(payload), verify=False)
     
     logging.debug(response.text)
     return response.json()
@@ -159,7 +159,7 @@ async def insert_timeseries(backend_url: str, timestamp: datetime, device_name: 
         'Content-Type': 'application/json'
     }
     
-    res = requests.request("POST", url, headers=headers, data=json.dumps(payload))
+    res = requests.request("POST", url, headers=headers, data=json.dumps(payload), verify=False)
 
     logging.debug(res.text)
     return res.json()
@@ -171,7 +171,7 @@ async def register_device(base_url:str,device_location: Optional[str] ,sensors: 
     }
     if sensors is not None:
         json_data["sensors"] = sensors
-    res = requests.post( f"{base_url}/update/device", json=json_data)
+    res = requests.post( f"{base_url}/update/device", json=json_data , verify=False)
 
     logging.debug(res.text)
     return res.json()
@@ -182,7 +182,7 @@ async def upload_image(base_url:str):
     file = open('temp/image.jpg', 'rb')
     files = {'file': ('image.jpg', file, 'image/jpeg')}
 
-    res = requests.post(url, files=files, timeout=30)
+    res = requests.post(url, files=files, timeout=30, verify=False)
     file.close()
     return res.json()
 
@@ -192,7 +192,7 @@ async def upload_audio(base_url:str):
     file = open('temp/audio.wav', 'rb')
     files = {'file': ('audio.wav', file, 'audio/wav')}
 
-    res = requests.post(url, files=files, timeout=30)
+    res = requests.post(url, files=files, timeout=30, verify=False)
     file.close()
     return res.json()
 
