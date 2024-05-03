@@ -143,7 +143,7 @@ pcm.dmic_sv {
   - BH1750 : Light Sensor - i2x addr 0x23
   - HTU2x : Humidity Sensor - i2c addr 0x40
   - SDC41: Co2 sensor - i2c addr 0x62
-  - 
+  - MLX90640: IR Sensor - i2c addr 0x0a 
 
 ### Libraries & Datasheets Used
 1. https://github.com/adafruit/Adafruit_CircuitPython_SCD4x
