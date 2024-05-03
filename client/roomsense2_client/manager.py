@@ -422,7 +422,7 @@ class TimingController(Thread):
     }
 
     exluded_actions = [
-        "SCD41TriggerAction",
+        #"SCD41TriggerAction",
         "HTU2XTriggerAction",
         "TSL2591TriggerAction", #
         "BH1750TriggerAction",
