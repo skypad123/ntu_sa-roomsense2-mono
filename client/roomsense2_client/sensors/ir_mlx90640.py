@@ -16,7 +16,7 @@ class MLX90640Reading:
 
 async def read_mlx90640(i2c_bus, timeout = datetime.timedelta(0,1,0)) -> MLX90640Reading:
     sensor = MLX90640(i2c_bus)
-    sensor.refresh_rate = MLX90640.RefreshRate.REFRESH_2_HZ
+    sensor.refresh_rate = MLX90640.RefreshRate.REFRESH_32_HZ
 
     frame = [0] * 768
     start_time = datetime.datetime.now()
